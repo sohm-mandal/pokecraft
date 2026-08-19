@@ -1,69 +1,82 @@
-import Image from "next/image";
+import Link from 'next/link'
+import { sql } from '@/lib/db'
+import type { Product } from '@/types'
+import { ProductCard } from '@/components/ProductCard'
 
-export default function Home() {
+async function getFeaturedProducts(): Promise<Product[]> {
+  const rows = await sql`
+    SELECT * FROM products
+    ORDER BY id
+    LIMIT 4
+  `
+  return rows as Product[]
+}
+
+export default async function HomePage() {
+  const products = await getFeaturedProducts()
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+    <>
+      {/* Hero */}
+      <section className="max-w-6xl mx-auto px-6 pt-16 pb-20 grid md:grid-cols-2 gap-12 items-center">
+        <div>
+          <p className="text-xs font-medium tracking-widest uppercase text-[#C9906A] mb-4">
+            Handmade with love
           </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+          <h1 className="font-serif text-5xl md:text-6xl leading-tight mb-6 text-[#1A1A18]">
+            Your favourite<br />Pokémon,<br />crocheted.
+          </h1>
+          <p className="text-[#6B6560] text-lg max-w-md mb-8">
+            Each plushie is handcrafted to order using premium cotton yarn. Ships across India.
+          </p>
+          <Link
+            href="/shop"
+            className="inline-block bg-[#1A1A18] text-[#F8F5F0] px-8 py-4 rounded-full font-medium hover:bg-[#C9906A] transition-colors"
           >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+            Shop the Collection
+          </Link>
         </div>
-      </main>
-    </div>
-  );
+        <div className="flex items-center justify-center">
+          <div className="w-80 h-80 rounded-full bg-[#F0EAE0] flex items-center justify-center text-[10rem]">
+            🧶
+          </div>
+        </div>
+      </section>
+
+      {/* Benefits bar */}
+      <div className="bg-[#1A1A18] text-[#F8F5F0] py-4">
+        <div className="max-w-6xl mx-auto px-6 flex flex-wrap justify-center gap-8 text-sm font-medium">
+          <span>✦ Handmade to order</span>
+          <span>✦ Ships pan-India</span>
+          <span>✦ Premium cotton yarn</span>
+          <span>✦ Secure Razorpay payments</span>
+        </div>
+      </div>
+
+      {/* Featured products */}
+      {products.length > 0 && (
+        <section className="max-w-6xl mx-auto px-6 py-16">
+          <div className="flex items-end justify-between mb-10">
+            <div>
+              <p className="text-xs font-medium tracking-widest uppercase text-[#C9906A] mb-2">
+                Best Sellers
+              </p>
+              <h2 className="font-serif text-4xl text-[#1A1A18]">Fan Favourites</h2>
+            </div>
+            <Link
+              href="/shop"
+              className="text-sm font-medium underline underline-offset-4 hover:text-[#C9906A] transition-colors"
+            >
+              View all →
+            </Link>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+            {products.map((p) => (
+              <ProductCard key={p.id} product={p} />
+            ))}
+          </div>
+        </section>
+      )}
+    </>
+  )
 }

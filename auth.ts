@@ -33,6 +33,51 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         }
       },
     }),
+    Credentials({
+      id: 'otp',
+      credentials: {
+        email: { label: 'Email' },
+        code: { label: 'OTP' },
+      },
+      async authorize(credentials) {
+        if (!credentials?.email || !credentials?.code) return null
+        const email = String(credentials.email).toLowerCase().trim()
+        const code = String(credentials.code).trim()
+
+        const rows = await sql`
+          SELECT * FROM otps WHERE email = ${email} LIMIT 1
+        `
+        const otp = rows[0] as { email: string; code: string; expires_at: string } | undefined
+        if (!otp) return null
+        if (otp.code !== code) return null
+        if (new Date(otp.expires_at) < new Date()) return null
+
+        // Delete used OTP
+        await sql`DELETE FROM otps WHERE email = ${email}`
+
+        // Upsert guest user in site_users
+        const existing = await sql`
+          SELECT * FROM site_users WHERE username = ${email} LIMIT 1
+        `
+        let user = existing[0] as { id: number; username: string; name: string; role: string } | undefined
+        if (!user) {
+          const name = email.split('@')[0]
+          const inserted = await sql`
+            INSERT INTO site_users (username, password, name, role)
+            VALUES (${email}, '', ${name}, 'guest')
+            RETURNING *
+          `
+          user = inserted[0] as { id: number; username: string; name: string; role: string }
+        }
+
+        return {
+          id: String(user.id),
+          name: user.name,
+          email: email,
+          role: user.role,
+        }
+      },
+    }),
   ],
   callbacks: {
     async signIn({ user, account }) {

@@ -15,6 +15,7 @@ export interface Product {
   price: number       // paise
   stock_count: number
   images: string[]
+  image_url: string | null
 }
 
 export interface CartItem {

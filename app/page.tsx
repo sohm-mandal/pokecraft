@@ -20,9 +20,9 @@ export default async function HomePage() {
   return (
     <>
       {/* ── HERO ── */}
-      <section style={{ display: 'flex', height: '580px', overflow: 'hidden' }}>
+      <section className="hero-section" style={{ display: 'flex', overflow: 'hidden' }}>
         {/* Left */}
-        <div style={{ width: '44%', padding: '64px 56px', display: 'flex', flexDirection: 'column', justifyContent: 'center', background: '#F8F5F0' }}>
+        <div className="hero-left" style={{ padding: '56px 32px', display: 'flex', flexDirection: 'column', justifyContent: 'center', background: '#F8F5F0' }}>
           <p style={{ fontSize: '11px', letterSpacing: '0.18em', textTransform: 'uppercase', color: '#C9906A', fontWeight: 400, marginBottom: '24px' }}>
             Handmade Crochet Pokémon
           </p>
@@ -40,25 +40,19 @@ export default async function HomePage() {
           </Link>
         </div>
 
-        {/* Right — hero visual */}
-        <div style={{ flex: 1, position: 'relative', overflow: 'hidden', background: '#EDE6DA', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          {/* Decorative crochet pattern background */}
-          <div style={{ position: 'absolute', inset: 0, opacity: 0.06, backgroundImage: 'radial-gradient(circle, #1A1A18 1.5px, transparent 1.5px)', backgroundSize: '28px 28px' }} />
-          {/* Center content */}
-          <div style={{ textAlign: 'center', zIndex: 1 }}>
-            <div style={{ fontSize: '120px', lineHeight: 1, marginBottom: '24px', filter: 'drop-shadow(0 8px 24px rgba(0,0,0,0.12))' }}>⚡</div>
-            <div style={{ fontFamily: 'var(--font-playfair, Georgia, serif)', fontSize: '22px', color: '#3A3530', letterSpacing: '-0.01em', marginBottom: '8px' }}>Every stitch, made by hand</div>
-            <div style={{ fontSize: '11px', letterSpacing: '0.2em', textTransform: 'uppercase', color: '#9A918A' }}>Premium Cotton Yarn</div>
-          </div>
-          {/* Floating badges */}
-          <div style={{ position: 'absolute', top: '32px', left: '32px', background: 'white', borderRadius: '100px', padding: '8px 16px', fontSize: '11px', fontWeight: 500, color: '#1A1A18', boxShadow: '0 2px 12px rgba(0,0,0,0.08)', letterSpacing: '0.05em' }}>✦ Made to Order</div>
-          <div style={{ position: 'absolute', bottom: '32px', right: '32px', background: 'white', borderRadius: '100px', padding: '8px 16px', fontSize: '11px', fontWeight: 500, color: '#1A1A18', boxShadow: '0 2px 12px rgba(0,0,0,0.08)', letterSpacing: '0.05em' }}>✦ Ships Worldwide</div>
-          <div style={{ position: 'absolute', bottom: '80px', left: '32px', background: '#C9906A', borderRadius: '100px', padding: '8px 16px', fontSize: '11px', fontWeight: 500, color: 'white', boxShadow: '0 2px 12px rgba(201,144,106,0.3)', letterSpacing: '0.05em' }}>✦ 100% Handmade</div>
+        {/* Right — YouTube video */}
+        <div className="hero-right" style={{ position: 'relative', overflow: 'hidden', background: '#1A1A18' }}>
+          <iframe
+            src="https://www.youtube.com/embed/NU5rFVTAzWw?autoplay=1&mute=1&loop=1&playlist=NU5rFVTAzWw&controls=0&showinfo=0&rel=0&modestbranding=1"
+            allow="autoplay; encrypted-media"
+            allowFullScreen
+            style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', width: '120%', height: '120%', border: 'none' }}
+          />
         </div>
       </section>
 
       {/* ── BENEFITS BAR ── */}
-      <div style={{ background: '#F0EBE1', borderTop: '1px solid #E4DBD0', borderBottom: '1px solid #E4DBD0', padding: '20px 56px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <div style={{ background: '#F0EBE1', borderTop: '1px solid #E4DBD0', borderBottom: '1px solid #E4DBD0', padding: '16px 20px', display: 'flex', alignItems: 'center', justifyContent: 'center', overflowX: 'auto' }}>
         {[
           { icon: '☕', label: '100% Handmade' },
           { icon: '🛡️', label: 'Premium Quality' },
@@ -77,7 +71,7 @@ export default async function HomePage() {
 
       {/* ── BEST SELLERS ── */}
       {products.length > 0 && (
-        <section style={{ padding: '80px 56px 96px', background: '#F8F5F0', maxWidth: '100%' }}>
+        <section style={{ padding: '56px 20px 72px', background: '#F8F5F0' }}>
           <div style={{ textAlign: 'center', marginBottom: '48px' }}>
             <span style={{ fontSize: '10px', letterSpacing: '0.24em', textTransform: 'uppercase', color: '#9A918A', display: 'block', marginBottom: '12px' }}>
               Our Most Loved
@@ -87,7 +81,7 @@ export default async function HomePage() {
             </h2>
           </div>
           <div style={{ maxWidth: '1152px', margin: '0 auto' }}>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '20px', marginBottom: '56px' }}>
+            <div className="products-grid" style={{ marginBottom: '40px' }}>
               {products.map((p) => (
                 <ProductCard key={p.id} product={p} />
               ))}
@@ -103,6 +97,22 @@ export default async function HomePage() {
           </div>
         </section>
       )}
+
+      <style>{`
+        .hero-section { height: 580px; }
+        .hero-left { width: 44%; }
+        .hero-right { flex: 1; min-height: 300px; }
+        .products-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
+        @media (max-width: 768px) {
+          .hero-section { height: auto; flex-direction: column; }
+          .hero-left { width: 100%; padding: 48px 24px !important; }
+          .hero-right { width: 100%; min-height: 280px; }
+          .products-grid { grid-template-columns: repeat(2, 1fr); gap: 14px; }
+        }
+        @media (max-width: 480px) {
+          .products-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+        }
+      `}</style>
     </>
   )
 }

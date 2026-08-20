@@ -64,7 +64,10 @@ export function AccountClient({ name, image, sessionEmail }: Props) {
           <h1 style={{ fontFamily: 'var(--font-playfair, Georgia, serif)', fontSize: '1.8rem', color: '#1A1A18', margin: 0 }}>{name}</h1>
         </div>
         <button
-          onClick={() => signOut({ callbackUrl: '/login' })}
+          onClick={async () => {
+            await signOut({ redirect: false })
+            window.location.href = '/login'
+          }}
           style={{ background: 'none', border: '1px solid #E4DBD0', padding: '8px 16px', borderRadius: '8px', fontSize: '12px', cursor: 'pointer', fontFamily: 'inherit', color: '#6B6560' }}
         >
           Sign out

@@ -58,6 +58,24 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       return session
     },
   },
+  session: {
+    strategy: 'jwt',
+    maxAge: 8 * 60 * 60, // 8 hours
+  },
+  cookies: {
+    sessionToken: {
+      name: process.env.NODE_ENV === 'production'
+        ? '__Secure-next-auth.session-token'
+        : 'next-auth.session-token',
+      options: {
+        httpOnly: true,
+        sameSite: 'lax',
+        path: '/',
+        secure: process.env.NODE_ENV === 'production',
+        // No maxAge = session cookie — expires when browser closes
+      },
+    },
+  },
   pages: {
     signIn: '/login',
   },

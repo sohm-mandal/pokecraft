@@ -35,7 +35,8 @@ export function ChatWidget() {
         body: JSON.stringify({ messages: next }),
       })
       const data = await res.json()
-      setMessages([...next, { role: 'model', parts: [{ text: data.text }] }])
+      const text = data.text ?? 'Sorry, I could not get a response.'
+      setMessages([...next, { role: 'model', parts: [{ text }] }])
     } catch {
       setMessages([...next, { role: 'model', parts: [{ text: 'Sorry, something went wrong. Please try again!' }] }])
     } finally {

@@ -12,8 +12,8 @@ export async function POST(req: NextRequest) {
   if (existing.length > 0) return NextResponse.json({ error: 'Account already exists.' }, { status: 409 })
 
   await sql`
-    INSERT INTO site_users (username, password, name, role)
-    VALUES (${normalised}, ${String(password)}, ${String(name).trim()}, 'guest')
+    INSERT INTO site_users (username, password, name, role, email)
+    VALUES (${normalised}, ${String(password)}, ${String(name).trim()}, 'guest', ${normalised})
   `
 
   return NextResponse.json({ ok: true })

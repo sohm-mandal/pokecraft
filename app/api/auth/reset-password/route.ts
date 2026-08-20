@@ -18,10 +18,10 @@ export async function POST(req: NextRequest) {
   // Delete OTP
   await sql`DELETE FROM otps WHERE email = ${normalised}`
 
-  // Update password
+  // Update password — look up by email column
   const updated = await sql`
     UPDATE site_users SET password = ${String(newPassword)}
-    WHERE username = ${normalised}
+    WHERE email = ${normalised}
     RETURNING id
   `
   if (updated.length === 0) return NextResponse.json({ error: 'No account found with this email.' }, { status: 404 })

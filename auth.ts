@@ -23,12 +23,10 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           AND password = ${String(credentials.password)}
           LIMIT 1
         `
-        const user = rows[0] as { id: number; username: string; name: string; role: string } | undefined
+        const user = rows[0] as { id: number; username: string; email: string | null; name: string; role: string } | undefined
         if (!user) return null
-        // If username is already a real email (OTP-created guests), use it directly
-        const email = user.username.includes('@') && !user.username.endsWith('@pokecraft.internal')
-          ? user.username
-          : `${user.username}@pokecraft.internal`
+        // Use the stored email column if available, otherwise fall back to a synthetic one
+        const email = user.email ?? `${user.username}@pokecraft.internal`
         return {
           id: String(user.id),
           name: user.name,
@@ -67,11 +65,11 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         if (!user) {
           const name = email.split('@')[0]
           const inserted = await sql`
-            INSERT INTO site_users (username, password, name, role)
-            VALUES (${email}, '', ${name}, 'guest')
+            INSERT INTO site_users (username, password, name, role, email)
+            VALUES (${email}, '', ${name}, 'guest', ${email})
             RETURNING *
           `
-          user = inserted[0] as { id: number; username: string; name: string; role: string }
+          user = inserted[0] as { id: number; username: string; email: string | null; name: string; role: string }
         }
 
         return {

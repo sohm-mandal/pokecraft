@@ -8,8 +8,8 @@ export async function POST(req: NextRequest) {
 
   const normalised = String(email).toLowerCase().trim()
 
-  // Check if user exists in site_users
-  const existing = await sql`SELECT id FROM site_users WHERE username = ${normalised} LIMIT 1`
+  // Check if user exists in site_users by email column
+  const existing = await sql`SELECT id FROM site_users WHERE email = ${normalised} LIMIT 1`
   const userExists = existing.length > 0
 
   if (mode === 'signup' && userExists) {

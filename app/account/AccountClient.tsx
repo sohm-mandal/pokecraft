@@ -12,8 +12,6 @@ interface Props {
 }
 
 export function AccountClient({ name, image, sessionEmail }: Props) {
-  const [email, setEmail] = useState(sessionEmail)
-  const [searchEmail, setSearchEmail] = useState(sessionEmail)
   const [orders, setOrders] = useState<Order[] | null>(null)
   const [loadingOrders, setLoadingOrders] = useState(false)
   const [wishlist, setWishlist] = useState<Product[]>([])
@@ -78,30 +76,12 @@ export function AccountClient({ name, image, sessionEmail }: Props) {
       <section style={{ marginBottom: '48px' }}>
         <h2 style={{ fontFamily: 'var(--font-playfair, Georgia, serif)', fontSize: '1.4rem', color: '#1A1A18', marginBottom: '16px' }}>Order History</h2>
 
-        {!sessionEmail && (
-          <div style={{ display: 'flex', gap: '8px', marginBottom: '16px' }}>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="Enter the email you used at checkout"
-              style={{ flex: 1, border: '1.5px solid #E4DBD0', borderRadius: '10px', padding: '10px 14px', fontSize: '13px', fontFamily: 'inherit', background: 'white', outline: 'none' }}
-            />
-            <button
-              onClick={() => { setSearchEmail(email); fetchOrders(email) }}
-              style={{ background: '#1A1A18', color: '#F8F5F0', border: 'none', borderRadius: '10px', padding: '10px 20px', fontSize: '13px', cursor: 'pointer', fontFamily: 'inherit' }}
-            >
-              Look up
-            </button>
-          </div>
-        )}
-
         {loadingOrders && <p style={{ color: '#9A918A', fontSize: '13px' }}>Loading orders…</p>}
 
         {orders !== null && !loadingOrders && (
           orders.length === 0 ? (
             <div style={{ background: 'white', border: '1px solid #E4DBD0', borderRadius: '12px', padding: '40px', textAlign: 'center', color: '#9A918A' }}>
-              <p style={{ margin: '0 0 16px' }}>No orders found{searchEmail ? ` for ${searchEmail}` : ''}.</p>
+              <p style={{ margin: '0 0 16px' }}>No orders found.</p>
               <Link href="/shop" style={{ color: '#C9906A', textDecoration: 'none', fontSize: '13px', fontWeight: 500 }}>Browse the shop →</Link>
             </div>
           ) : (
@@ -129,9 +109,9 @@ export function AccountClient({ name, image, sessionEmail }: Props) {
           )
         )}
 
-        {orders === null && !loadingOrders && !sessionEmail && (
+        {orders === null && !loadingOrders && (
           <div style={{ background: 'white', border: '1px solid #E4DBD0', borderRadius: '12px', padding: '32px', textAlign: 'center', color: '#9A918A', fontSize: '13px' }}>
-            Enter the email you used when placing your order to see your order history.
+            No order history available.
           </div>
         )}
       </section>

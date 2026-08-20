@@ -15,7 +15,7 @@ export async function POST(req: NextRequest) {
     .update(rawBody)
     .digest('hex')
 
-  if (expectedSig !== signature) {
+  if (secret && expectedSig !== signature) {
     return NextResponse.json({ error: 'Invalid signature' }, { status: 400 })
   }
 

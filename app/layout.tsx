@@ -9,6 +9,7 @@ import { WishlistIcon } from '@/components/WishlistIcon'
 import { ChatWidget } from '@/components/ChatWidget'
 import { UserMenu } from '@/components/UserMenu'
 import { AdminTopBar } from '@/components/AdminTopBar'
+import { PageLoader } from '@/components/PageLoader'
 import './globals.css'
 
 const playfair = Playfair_Display({
@@ -51,6 +52,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <meta name="viewport" content="width=device-width, initial-scale=1" />
       </head>
       <body style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', background: '#F8F5F0', color: '#1A1A18', fontFamily: 'var(--font-jost, Jost, system-ui, sans-serif)', margin: 0 }}>
+        <PageLoader />
 
         {/* ── ADMIN BAR (admins only, replaces the customer header entirely) ── */}
         {loggedIn && isAdmin && (

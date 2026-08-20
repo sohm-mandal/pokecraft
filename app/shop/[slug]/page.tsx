@@ -105,6 +105,33 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
           Handmade to order · Ships within 7–10 days · Pan-India delivery
         </p>
       </div>
+      {/* Watch Us Make It */}
+      <div style={{ gridColumn: '1 / -1', marginTop: '48px' }}>
+        <p style={{ fontSize: '10px', letterSpacing: '0.2em', textTransform: 'uppercase', color: '#C9906A', marginBottom: '8px', fontWeight: 500 }}>Behind the Scenes</p>
+        <h2 style={{ fontFamily: 'var(--font-playfair, Georgia, serif)', fontSize: '1.8rem', color: '#1A1A18', marginBottom: '24px' }}>Watch Us Make It</h2>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '16px' }}>
+          {[
+            { id: 'OfnWOLmJbr8', title: 'Crochet Gengar Custom Order' },
+            { id: 'gj-G0frikmI', title: 'Pokémon Plushies for Anime Con' },
+            { id: 'i3LdtHfRsSw', title: 'Fluffy Pokémon Plushies Vlog' },
+            { id: 'WvoU3Yt3t2A', title: 'Turning Pokémon into a Plushie' },
+            { id: 'lfgYHmiPlQ4', title: 'Pikachu Amigurumi Tutorial' },
+          ].map(({ id, title }) => (
+            <div key={id} style={{ borderRadius: '12px', overflow: 'hidden', background: '#1A1A18' }}>
+              <div style={{ position: 'relative', paddingTop: '56.25%' }}>
+                <iframe
+                  src={`https://www.youtube.com/embed/${id}?rel=0&modestbranding=1`}
+                  title={title}
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                  style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', border: 'none' }}
+                />
+              </div>
+              <p style={{ padding: '10px 14px', fontSize: '12px', color: '#9A918A', margin: 0 }}>{title}</p>
+            </div>
+          ))}
+        </div>
+      </div>
     </div>
   )
 }

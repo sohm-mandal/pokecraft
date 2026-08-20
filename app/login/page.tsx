@@ -19,12 +19,16 @@ function LoginForm() {
     e.preventDefault()
     setLoading(true)
     setError('')
-    const res = await signIn('admin', { username, password, callbackUrl, redirect: false })
+    const res = await signIn('credentials', { username, password, redirect: false })
     if (res?.error) {
       setError('Invalid username or password')
       setLoading(false)
     } else {
-      window.location.href = callbackUrl
+      // Fetch session to check role
+      const sessionRes = await fetch('/api/auth/session')
+      const session = await sessionRes.json()
+      const role = session?.user?.role
+      window.location.href = role === 'admin' ? '/admin' : (callbackUrl === '/login' ? '/' : callbackUrl)
     }
   }
 
@@ -54,7 +58,7 @@ function LoginForm() {
               onClick={() => setAdminMode(true)}
               style={{ width: '100%', padding: '14px 24px', border: '1.5px solid #E4DBD0', borderRadius: '12px', background: 'transparent', cursor: 'pointer', fontSize: '13px', color: '#6B6560', fontFamily: 'inherit', letterSpacing: '0.05em' }}
             >
-              Admin Login
+              Login with Username & Password
             </button>
 
             <p style={{ textAlign: 'center', fontSize: '12px', color: '#9A918A', marginTop: '16px' }}>

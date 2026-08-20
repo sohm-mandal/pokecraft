@@ -10,19 +10,27 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
     }),
     Credentials({
-      id: 'admin',
+      id: 'credentials',
       credentials: {
         username: { label: 'Username' },
         password: { label: 'Password', type: 'password' },
       },
-      authorize(credentials) {
-        if (
-          credentials.username === process.env.ADMIN_USERNAME &&
-          credentials.password === process.env.ADMIN_PASSWORD
-        ) {
-          return { id: 'admin', name: 'Admin', email: 'admin@pokecraft.internal', role: 'admin' }
+      async authorize(credentials) {
+        if (!credentials?.username || !credentials?.password) return null
+        const rows = await sql`
+          SELECT * FROM site_users
+          WHERE username = ${String(credentials.username)}
+          AND password = ${String(credentials.password)}
+          LIMIT 1
+        `
+        const user = rows[0] as { id: number; username: string; name: string; role: string } | undefined
+        if (!user) return null
+        return {
+          id: String(user.id),
+          name: user.name,
+          email: `${user.username}@pokecraft.internal`,
+          role: user.role,
         }
-        return null
       },
     }),
   ],

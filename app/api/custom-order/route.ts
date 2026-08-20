@@ -8,7 +8,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
   }
 
-  const sellerEmail = process.env.SELLER_EMAIL!
+  const sellerEmail = process.env.GMAIL_USER!
 
   try {
     // Notify seller

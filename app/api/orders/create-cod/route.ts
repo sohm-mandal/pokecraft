@@ -57,7 +57,7 @@ export async function POST(req: NextRequest) {
   try {
     await mailer.sendMail({
       from: `PokéCraft <${process.env.GMAIL_USER}>`,
-      to: process.env.SELLER_EMAIL!,
+      to: process.env.GMAIL_USER!,
       subject: `New COD Order #${orderId} — ₹${Math.round(total / 100)}`,
       html: `
         <div style="font-family:sans-serif;max-width:480px;margin:0 auto;color:#1A1A18">

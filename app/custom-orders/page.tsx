@@ -115,7 +115,9 @@ export default function CustomOrdersPage() {
         </div>
 
         {status === 'error' && (
-          <p style={{ color: '#E05252', fontSize: '13px', margin: 0 }}>Something went wrong. Please try again or email me directly at sohammandal.work24@gmail.com</p>
+          <p style={{ color: '#E05252', fontSize: '13px', margin: 0 }}>
+            Something went wrong. Please try again — if the problem persists, use the chat widget or come back shortly.
+          </p>
         )}
 
         <button

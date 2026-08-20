@@ -3,6 +3,7 @@ import { Playfair_Display, Jost } from 'next/font/google'
 import Link from 'next/link'
 import Script from 'next/script'
 import { CartIcon } from '@/components/CartIcon'
+import { ChatWidget } from '@/components/ChatWidget'
 import './globals.css'
 
 const playfair = Playfair_Display({
@@ -142,6 +143,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           }
         `}</style>
 
+        <ChatWidget />
         <Script id="razorpay" src="https://checkout.razorpay.com/v1/checkout.js" strategy="lazyOnload" />
       </body>
     </html>

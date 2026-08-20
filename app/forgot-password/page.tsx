@@ -36,15 +36,20 @@ function ForgotPasswordForm() {
   async function handleSendOtp(e: FormEvent) {
     e.preventDefault()
     setLoading(true); setError('')
-    const res = await fetch('/api/auth/send-otp', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, mode: 'forgot-password' }),
-    })
-    const data = await res.json()
-    if (!res.ok) { setError(data.error ?? 'Failed to send code.'); setLoading(false); return }
-    setStep('reset')
-    setLoading(false)
+    try {
+      const res = await fetch('/api/auth/send-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, mode: 'forgot-password' }),
+      })
+      const data = await res.json()
+      if (!res.ok) { setError(data.error ?? 'Failed to send code.'); return }
+      setStep('reset')
+    } catch {
+      setError('Something went wrong. Please try again.')
+    } finally {
+      setLoading(false)
+    }
   }
 
   // Step 2 — verify OTP + set new password
@@ -54,24 +59,26 @@ function ForgotPasswordForm() {
     if (newPassword.length < 6) { setError('Password must be at least 6 characters.'); return }
     if (code.length < 6) { setError('Please enter the 6-digit code from your email.'); return }
     setLoading(true); setError('')
+    try {
+      const res = await fetch('/api/auth/reset-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, code, newPassword }),
+      })
+      const data = await res.json()
+      if (!res.ok) { setError(data.error ?? 'Failed to reset password.'); return }
 
-    const res = await fetch('/api/auth/reset-password', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, code, newPassword }),
-    })
-    const data = await res.json()
-    if (!res.ok) { setError(data.error ?? 'Failed to reset password.'); setLoading(false); return }
-
-    // Auto sign-in with new password
-    const signInRes = await signIn('credentials', { username: email, password: newPassword, redirect: false })
-    if (signInRes?.error) {
-      // Password reset succeeded but sign-in failed — show success and redirect to login
-      setSuccess(true)
+      const signInRes = await signIn('credentials', { username: email, password: newPassword, redirect: false })
+      if (signInRes?.error) {
+        setSuccess(true)
+        setTimeout(() => { window.location.href = '/login' }, 2500)
+      } else {
+        window.location.href = dest
+      }
+    } catch {
+      setError('Something went wrong. Please try again.')
+    } finally {
       setLoading(false)
-      setTimeout(() => { window.location.href = '/login' }, 2500)
-    } else {
-      window.location.href = dest
     }
   }
 

@@ -6,7 +6,12 @@ export default auth((req) => {
   const role = (req.auth?.user as { role?: string })?.role
   const isLoggedIn = !!req.auth
 
-  // Always allow login page and auth API
+  // Redirect already-logged-in users away from auth pages
+  if (isLoggedIn && (pathname.startsWith('/login') || pathname.startsWith('/signup') || pathname.startsWith('/forgot-password'))) {
+    return NextResponse.redirect(new URL('/', req.url))
+  }
+
+  // Always allow auth pages and auth API for unauthenticated users
   if (pathname.startsWith('/login') || pathname.startsWith('/signup') || pathname.startsWith('/forgot-password') || pathname.startsWith('/api/auth')) {
     return NextResponse.next()
   }

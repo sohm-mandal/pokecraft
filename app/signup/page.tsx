@@ -36,30 +36,40 @@ function SignupForm() {
   async function handleSendOtp(e: FormEvent) {
     e.preventDefault()
     setLoading(true); setError('')
-    const res = await fetch('/api/auth/send-otp', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, mode: 'signup' }),
-    })
-    const data = await res.json()
-    if (!res.ok) setError(data.error ?? 'Failed to send OTP.')
-    else setStep('otp')
-    setLoading(false)
+    try {
+      const res = await fetch('/api/auth/send-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, mode: 'signup' }),
+      })
+      const data = await res.json()
+      if (!res.ok) setError(data.error ?? 'Failed to send OTP.')
+      else setStep('otp')
+    } catch {
+      setError('Something went wrong. Please try again.')
+    } finally {
+      setLoading(false)
+    }
   }
 
   // Step 2 — verify OTP
   async function handleVerifyOtp(e: FormEvent) {
     e.preventDefault()
     setLoading(true); setError('')
-    const res = await fetch('/api/auth/check-otp', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, code }),
-    })
-    const data = await res.json()
-    if (!res.ok) { setError(data.error ?? 'Invalid code.'); setLoading(false); return }
-    setStep('setup')
-    setLoading(false)
+    try {
+      const res = await fetch('/api/auth/check-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, code }),
+      })
+      const data = await res.json()
+      if (!res.ok) { setError(data.error ?? 'Invalid code.'); return }
+      setStep('setup')
+    } catch {
+      setError('Something went wrong. Please try again.')
+    } finally {
+      setLoading(false)
+    }
   }
 
   // Step 3 — create account then sign in
@@ -68,18 +78,23 @@ function SignupForm() {
     if (password !== confirmPassword) { setError('Passwords do not match.'); return }
     if (password.length < 6) { setError('Password must be at least 6 characters.'); return }
     setLoading(true); setError('')
+    try {
+      const createRes = await fetch('/api/auth/complete-signup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, name, password }),
+      })
+      const createData = await createRes.json()
+      if (!createRes.ok) { setError(createData.error ?? 'Failed to create account.'); return }
 
-    const createRes = await fetch('/api/auth/complete-signup', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, name, password }),
-    })
-    const createData = await createRes.json()
-    if (!createRes.ok) { setError(createData.error ?? 'Failed to create account.'); setLoading(false); return }
-
-    const res = await signIn('credentials', { username: email, password, redirect: false })
-    if (res?.error) { setError('Account created but sign-in failed. Please go to login.'); setLoading(false); return }
-    window.location.href = dest
+      const res = await signIn('credentials', { username: email, password, redirect: false })
+      if (res?.error) { setError('Account created but sign-in failed. Please go to login.'); return }
+      window.location.href = dest
+    } catch {
+      setError('Something went wrong. Please try again.')
+    } finally {
+      setLoading(false)
+    }
   }
 
   async function resendOtp() {

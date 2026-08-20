@@ -11,6 +11,7 @@ export interface Product {
   name: string
   slug: string
   pokemon_name: string
+  pokemon_type: string | null
   description: string | null
   price: number       // paise
   stock_count: number

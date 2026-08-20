@@ -82,6 +82,17 @@ export function CheckoutClient({ sessionEmail, sessionName }: Props) {
         email: form.buyer_email,
         contact: form.buyer_phone,
       },
+      method: {
+        upi: true,
+        card: true,
+        netbanking: true,
+        wallet: true,
+      },
+      config: {
+        display: {
+          preferences: { show_default_blocks: true },
+        },
+      },
       handler: async (response: {
         razorpay_payment_id: string
         razorpay_order_id: string

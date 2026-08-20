@@ -16,10 +16,15 @@ interface Props {
   sessionName: string
 }
 
+type PaymentMode = 'online' | 'cod'
+
+const inputCls = 'w-full border border-[#E5DDD4] rounded-xl px-4 py-3 bg-white focus:outline-none focus:border-[#1A1A18]'
+
 export function CheckoutClient({ sessionEmail, sessionName }: Props) {
   const router = useRouter()
   const [cart, setCart] = useState<CartItem[]>([])
   const [loading, setLoading] = useState(false)
+  const [paymentMode, setPaymentMode] = useState<PaymentMode>('online')
   const [form, setForm] = useState({
     buyer_name: sessionName,
     buyer_email: sessionEmail,
@@ -41,10 +46,16 @@ export function CheckoutClient({ sessionEmail, sessionName }: Props) {
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }))
   }
 
-  async function handleSubmit(e: FormEvent) {
-    e.preventDefault()
-    setLoading(true)
+  const shippingAddress = {
+    line1: form.line1,
+    line2: form.line2 || undefined,
+    city: form.city,
+    state: form.state,
+    pincode: form.pincode,
+  }
 
+  async function handleOnlinePayment() {
+    setLoading(true)
     const res = await fetch('/api/orders/create', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -52,20 +63,13 @@ export function CheckoutClient({ sessionEmail, sessionName }: Props) {
         buyer_name: form.buyer_name,
         buyer_email: form.buyer_email,
         buyer_phone: form.buyer_phone,
-        shipping_address: {
-          line1: form.line1,
-          line2: form.line2 || undefined,
-          city: form.city,
-          state: form.state,
-          pincode: form.pincode,
-        },
+        shipping_address: shippingAddress,
         items: cart,
       }),
     })
-
     const data = await res.json()
     if (!res.ok) {
-      alert(data.error ?? 'Something went wrong. Please try again.')
+      alert(data.error ?? 'Something went wrong.')
       setLoading(false)
       return
     }
@@ -82,16 +86,12 @@ export function CheckoutClient({ sessionEmail, sessionName }: Props) {
         email: form.buyer_email,
         contact: form.buyer_phone,
       },
+      // "1" strings are the correct Razorpay API format for enabling methods
       method: {
-        upi: true,
-        card: true,
-        netbanking: true,
-        wallet: true,
-      },
-      config: {
-        display: {
-          preferences: { show_default_blocks: true },
-        },
+        upi: '1',
+        card: '1',
+        netbanking: '1',
+        wallet: '1',
       },
       handler: async (response: {
         razorpay_payment_id: string
@@ -108,120 +108,109 @@ export function CheckoutClient({ sessionEmail, sessionName }: Props) {
           }),
         })
         if (!verifyRes.ok) {
-          alert('Payment verification failed. Please contact support with your payment ID: ' + response.razorpay_payment_id)
+          alert('Payment verification failed. Contact support with payment ID: ' + response.razorpay_payment_id)
           setLoading(false)
           return
         }
         clearCart()
         router.push(`/order/${data.orderId}`)
       },
-      modal: {
-        ondismiss: () => setLoading(false),
-      },
+      modal: { ondismiss: () => setLoading(false) },
     })
-
     rzp.open()
   }
 
+  async function handleCOD() {
+    setLoading(true)
+    const res = await fetch('/api/orders/create-cod', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        buyer_name: form.buyer_name,
+        buyer_email: form.buyer_email,
+        buyer_phone: form.buyer_phone,
+        shipping_address: shippingAddress,
+        items: cart,
+      }),
+    })
+    const data = await res.json()
+    if (!res.ok) {
+      alert(data.error ?? 'Something went wrong.')
+      setLoading(false)
+      return
+    }
+    clearCart()
+    router.push(`/order/${data.orderId}`)
+  }
+
+  async function handleSubmit(e: FormEvent) {
+    e.preventDefault()
+    if (paymentMode === 'cod') await handleCOD()
+    else await handleOnlinePayment()
+  }
+
   const total = cartTotal(cart)
-  const totalRupees = (total / 100).toLocaleString('en-IN', {
-    style: 'currency',
-    currency: 'INR',
-    minimumFractionDigits: 0,
-  })
+  const totalRupees = (total / 100).toLocaleString('en-IN', { style: 'currency', currency: 'INR', minimumFractionDigits: 0 })
 
   return (
     <div className="max-w-2xl mx-auto px-6 py-12">
       <h1 className="font-serif text-4xl mb-10">Checkout</h1>
       <form onSubmit={handleSubmit} className="space-y-6">
+
+        {/* Contact */}
         <section>
-          <h2 className="font-medium text-sm tracking-widest uppercase text-[#6B6560] mb-4">
-            Contact Details
-          </h2>
+          <h2 className="font-medium text-sm tracking-widest uppercase text-[#6B6560] mb-4">Contact Details</h2>
           <div className="space-y-4">
+            <input name="buyer_name" value={form.buyer_name} onChange={handleChange} required placeholder="Full Name" className={inputCls} />
             <input
-              name="buyer_name"
-              value={form.buyer_name}
-              onChange={handleChange}
-              required
-              placeholder="Full Name"
-              className="w-full border border-[#E5DDD4] rounded-xl px-4 py-3 bg-white focus:outline-none focus:border-[#1A1A18]"
+              name="buyer_email" type="email" value={form.buyer_email} onChange={handleChange} required
+              placeholder="Email Address" readOnly={!!sessionEmail}
+              className={`${inputCls} ${sessionEmail ? 'bg-[#F8F5F0] text-[#6B6560] cursor-not-allowed' : ''}`}
             />
-            <input
-              name="buyer_email"
-              type="email"
-              value={form.buyer_email}
-              onChange={handleChange}
-              required
-              placeholder="Email Address"
-              readOnly={!!sessionEmail}
-              className={`w-full border border-[#E5DDD4] rounded-xl px-4 py-3 bg-white focus:outline-none focus:border-[#1A1A18] ${sessionEmail ? 'bg-[#F8F5F0] text-[#6B6560] cursor-not-allowed' : ''}`}
-            />
-            <input
-              name="buyer_phone"
-              type="tel"
-              value={form.buyer_phone}
-              onChange={handleChange}
-              required
-              pattern="[6-9][0-9]{9}"
-              title="Enter a valid 10-digit Indian mobile number"
-              placeholder="Mobile Number (10 digits)"
-              className="w-full border border-[#E5DDD4] rounded-xl px-4 py-3 bg-white focus:outline-none focus:border-[#1A1A18]"
-            />
+            <input name="buyer_phone" type="tel" value={form.buyer_phone} onChange={handleChange} required pattern="[6-9][0-9]{9}" title="Enter a valid 10-digit Indian mobile number" placeholder="Mobile Number (10 digits)" className={inputCls} />
           </div>
         </section>
 
+        {/* Shipping */}
         <section>
-          <h2 className="font-medium text-sm tracking-widest uppercase text-[#6B6560] mb-4">
-            Shipping Address
-          </h2>
+          <h2 className="font-medium text-sm tracking-widest uppercase text-[#6B6560] mb-4">Shipping Address</h2>
           <div className="space-y-4">
-            <input
-              name="line1"
-              value={form.line1}
-              onChange={handleChange}
-              required
-              placeholder="Address Line 1"
-              className="w-full border border-[#E5DDD4] rounded-xl px-4 py-3 bg-white focus:outline-none focus:border-[#1A1A18]"
-            />
-            <input
-              name="line2"
-              value={form.line2}
-              onChange={handleChange}
-              placeholder="Address Line 2 (optional)"
-              className="w-full border border-[#E5DDD4] rounded-xl px-4 py-3 bg-white focus:outline-none focus:border-[#1A1A18]"
-            />
+            <input name="line1" value={form.line1} onChange={handleChange} required placeholder="Address Line 1" className={inputCls} />
+            <input name="line2" value={form.line2} onChange={handleChange} placeholder="Address Line 2 (optional)" className={inputCls} />
             <div className="grid grid-cols-2 gap-4">
-              <input
-                name="city"
-                value={form.city}
-                onChange={handleChange}
-                required
-                placeholder="City"
-                className="border border-[#E5DDD4] rounded-xl px-4 py-3 bg-white focus:outline-none focus:border-[#1A1A18]"
-              />
-              <input
-                name="state"
-                value={form.state}
-                onChange={handleChange}
-                required
-                placeholder="State"
-                className="border border-[#E5DDD4] rounded-xl px-4 py-3 bg-white focus:outline-none focus:border-[#1A1A18]"
-              />
+              <input name="city" value={form.city} onChange={handleChange} required placeholder="City" className="border border-[#E5DDD4] rounded-xl px-4 py-3 bg-white focus:outline-none focus:border-[#1A1A18]" />
+              <input name="state" value={form.state} onChange={handleChange} required placeholder="State" className="border border-[#E5DDD4] rounded-xl px-4 py-3 bg-white focus:outline-none focus:border-[#1A1A18]" />
             </div>
-            <input
-              name="pincode"
-              value={form.pincode}
-              onChange={handleChange}
-              required
-              pattern="[1-9][0-9]{5}"
-              title="Enter a valid 6-digit PIN code"
-              placeholder="PIN Code"
-              className="w-full border border-[#E5DDD4] rounded-xl px-4 py-3 bg-white focus:outline-none focus:border-[#1A1A18]"
-            />
+            <input name="pincode" value={form.pincode} onChange={handleChange} required pattern="[1-9][0-9]{5}" title="Enter a valid 6-digit PIN code" placeholder="PIN Code" className={inputCls} />
           </div>
         </section>
 
+        {/* Payment method selector */}
+        <section>
+          <h2 className="font-medium text-sm tracking-widest uppercase text-[#6B6560] mb-4">Payment Method</h2>
+          <div style={{ display: 'flex', gap: '12px' }}>
+            {([['online', '💳', 'Pay Online', 'Cards, UPI, Netbanking, Wallets'], ['cod', '🏠', 'Cash on Delivery', 'Pay when your order arrives']] as const).map(([mode, icon, label, sub]) => (
+              <button
+                key={mode}
+                type="button"
+                onClick={() => setPaymentMode(mode)}
+                style={{
+                  flex: 1, padding: '14px 16px', borderRadius: '12px', cursor: 'pointer', textAlign: 'left',
+                  border: `1.5px solid ${paymentMode === mode ? '#1A1A18' : '#E4DBD0'}`,
+                  background: paymentMode === mode ? '#1A1A18' : 'white',
+                  color: paymentMode === mode ? '#F8F5F0' : '#1A1A18',
+                  fontFamily: 'inherit', transition: 'all 0.15s',
+                }}
+              >
+                <div style={{ fontSize: '20px', marginBottom: '4px' }}>{icon}</div>
+                <div style={{ fontSize: '13px', fontWeight: 600 }}>{label}</div>
+                <div style={{ fontSize: '11px', opacity: 0.7, marginTop: '2px' }}>{sub}</div>
+              </button>
+            ))}
+          </div>
+        </section>
+
+        {/* Total + CTA */}
         <div className="border-t border-[#E5DDD4] pt-6 flex items-center justify-between">
           <div>
             <p className="text-sm text-[#6B6560]">Order Total</p>
@@ -232,7 +221,9 @@ export function CheckoutClient({ sessionEmail, sessionName }: Props) {
             disabled={loading}
             className="bg-[#1A1A18] text-[#F8F5F0] px-10 py-4 rounded-full font-medium hover:bg-[#C9906A] transition-colors disabled:opacity-60"
           >
-            {loading ? 'Opening payment…' : `Pay ${totalRupees}`}
+            {loading
+              ? (paymentMode === 'cod' ? 'Placing order…' : 'Opening payment…')
+              : (paymentMode === 'cod' ? 'Place Order (COD)' : `Pay ${totalRupees}`)}
           </button>
         </div>
       </form>

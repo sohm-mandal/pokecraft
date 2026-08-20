@@ -43,10 +43,10 @@ export default async function HomePage() {
         {/* Right — YouTube video */}
         <div className="hero-right" style={{ position: 'relative', overflow: 'hidden', background: '#1A1A18' }}>
           <iframe
-            src="https://www.youtube.com/embed/gj-G0frikmI?autoplay=1&mute=1&loop=1&playlist=gj-G0frikmI&rel=0&modestbranding=1&enablejsapi=1"
+            src="https://www.youtube.com/embed/gj-G0frikmI?autoplay=1&mute=1&loop=1&playlist=gj-G0frikmI&rel=0&modestbranding=1&controls=1"
             allow="autoplay; encrypted-media; picture-in-picture"
             allowFullScreen
-            style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', width: '140%', height: '140%', border: 'none' }}
+            style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', border: 'none' }}
           />
         </div>
       </section>

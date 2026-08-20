@@ -3,6 +3,8 @@ import Image from 'next/image'
 import { sql } from '@/lib/db'
 import type { Product } from '@/types'
 import { StockBadge } from '@/components/StockBadge'
+
+export const dynamic = 'force-dynamic'
 import { CartButton } from '@/components/CartButton'
 
 function isVideo(url: string) {

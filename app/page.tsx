@@ -3,6 +3,8 @@ import { sql } from '@/lib/db'
 import type { Product } from '@/types'
 import { ProductCard } from '@/components/ProductCard'
 
+export const dynamic = 'force-dynamic'
+
 async function getFeaturedProducts(): Promise<Product[]> {
   try {
     const rows = await sql`SELECT * FROM products ORDER BY id LIMIT 4`
@@ -38,19 +40,20 @@ export default async function HomePage() {
           </Link>
         </div>
 
-        {/* Right — video */}
-        <div style={{ flex: 1, position: 'relative', overflow: 'hidden', background: '#EDE6DA' }}>
-          <video
-            src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4"
-            autoPlay
-            muted
-            loop
-            playsInline
-            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-          />
-          <div style={{ position: 'absolute', bottom: '24px', right: '24px', background: 'rgba(248,245,240,0.88)', backdropFilter: 'blur(4px)', padding: '9px 16px', border: '1px solid #E4DBD0', fontSize: '11px', letterSpacing: '0.1em', color: '#6B6560', textTransform: 'uppercase' }}>
-            Handmade Crochet
+        {/* Right — hero visual */}
+        <div style={{ flex: 1, position: 'relative', overflow: 'hidden', background: '#EDE6DA', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          {/* Decorative crochet pattern background */}
+          <div style={{ position: 'absolute', inset: 0, opacity: 0.06, backgroundImage: 'radial-gradient(circle, #1A1A18 1.5px, transparent 1.5px)', backgroundSize: '28px 28px' }} />
+          {/* Center content */}
+          <div style={{ textAlign: 'center', zIndex: 1 }}>
+            <div style={{ fontSize: '120px', lineHeight: 1, marginBottom: '24px', filter: 'drop-shadow(0 8px 24px rgba(0,0,0,0.12))' }}>⚡</div>
+            <div style={{ fontFamily: 'var(--font-playfair, Georgia, serif)', fontSize: '22px', color: '#3A3530', letterSpacing: '-0.01em', marginBottom: '8px' }}>Every stitch, made by hand</div>
+            <div style={{ fontSize: '11px', letterSpacing: '0.2em', textTransform: 'uppercase', color: '#9A918A' }}>Premium Cotton Yarn</div>
           </div>
+          {/* Floating badges */}
+          <div style={{ position: 'absolute', top: '32px', left: '32px', background: 'white', borderRadius: '100px', padding: '8px 16px', fontSize: '11px', fontWeight: 500, color: '#1A1A18', boxShadow: '0 2px 12px rgba(0,0,0,0.08)', letterSpacing: '0.05em' }}>✦ Made to Order</div>
+          <div style={{ position: 'absolute', bottom: '32px', right: '32px', background: 'white', borderRadius: '100px', padding: '8px 16px', fontSize: '11px', fontWeight: 500, color: '#1A1A18', boxShadow: '0 2px 12px rgba(0,0,0,0.08)', letterSpacing: '0.05em' }}>✦ Ships Worldwide</div>
+          <div style={{ position: 'absolute', bottom: '80px', left: '32px', background: '#C9906A', borderRadius: '100px', padding: '8px 16px', fontSize: '11px', fontWeight: 500, color: 'white', boxShadow: '0 2px 12px rgba(201,144,106,0.3)', letterSpacing: '0.05em' }}>✦ 100% Handmade</div>
         </div>
       </section>
 

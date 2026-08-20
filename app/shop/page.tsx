@@ -2,6 +2,8 @@ import { sql } from '@/lib/db'
 import type { Product } from '@/types'
 import { ProductCard } from '@/components/ProductCard'
 
+export const dynamic = 'force-dynamic'
+
 async function getAllProducts(): Promise<Product[]> {
   const rows = await sql`SELECT * FROM products ORDER BY id`
   return rows as Product[]

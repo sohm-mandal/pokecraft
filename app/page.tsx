@@ -4,12 +4,12 @@ import type { Product } from '@/types'
 import { ProductCard } from '@/components/ProductCard'
 
 async function getFeaturedProducts(): Promise<Product[]> {
-  const rows = await sql`
-    SELECT * FROM products
-    ORDER BY id
-    LIMIT 4
-  `
-  return rows as Product[]
+  try {
+    const rows = await sql`SELECT * FROM products ORDER BY id LIMIT 4`
+    return rows as Product[]
+  } catch {
+    return []
+  }
 }
 
 export default async function HomePage() {
@@ -17,63 +17,86 @@ export default async function HomePage() {
 
   return (
     <>
-      {/* Hero */}
-      <section className="max-w-6xl mx-auto px-6 pt-16 pb-20 grid md:grid-cols-2 gap-12 items-center">
-        <div>
-          <p className="text-xs font-medium tracking-widest uppercase text-[#C9906A] mb-4">
-            Handmade with love
+      {/* ── HERO ── */}
+      <section style={{ display: 'flex', height: '580px', overflow: 'hidden' }}>
+        {/* Left */}
+        <div style={{ width: '44%', padding: '64px 56px', display: 'flex', flexDirection: 'column', justifyContent: 'center', background: '#F8F5F0' }}>
+          <p style={{ fontSize: '11px', letterSpacing: '0.18em', textTransform: 'uppercase', color: '#C9906A', fontWeight: 400, marginBottom: '24px' }}>
+            Handmade Crochet Pokémon
           </p>
-          <h1 className="font-serif text-5xl md:text-6xl leading-tight mb-6 text-[#1A1A18]">
-            Your favourite<br />Pokémon,<br />crocheted.
+          <h1 style={{ fontFamily: 'var(--font-playfair, Georgia, serif)', fontSize: '58px', fontWeight: 500, lineHeight: 1.06, letterSpacing: '-0.02em', color: '#1A1A18', marginBottom: '24px' }}>
+            Handmade<br/>with love.<br/>Made to be<br/>yours. <span style={{ color: '#C9A040' }}>♥</span>
           </h1>
-          <p className="text-[#6B6560] text-lg max-w-md mb-8">
-            Each plushie is handcrafted to order using premium cotton yarn. Ships across India.
+          <p style={{ fontSize: '15px', lineHeight: 1.65, color: '#6B6560', fontWeight: 300, maxWidth: '360px', marginBottom: '44px' }}>
+            Adorable, high-quality crochet Pokémon made with premium yarn and endless care.
           </p>
           <Link
             href="/shop"
-            className="inline-block bg-[#1A1A18] text-[#F8F5F0] px-8 py-4 rounded-full font-medium hover:bg-[#C9906A] transition-colors"
+            style={{ display: 'inline-flex', alignItems: 'center', gap: '12px', background: '#1A1A18', color: '#F8F5F0', padding: '15px 32px', fontSize: '11px', letterSpacing: '0.18em', textTransform: 'uppercase', fontWeight: 500, textDecoration: 'none', alignSelf: 'flex-start' }}
           >
-            Shop the Collection
+            Shop Collection
           </Link>
         </div>
-        <div className="flex items-center justify-center">
-          <div className="w-80 h-80 rounded-full bg-[#F0EAE0] flex items-center justify-center text-[10rem]">
-            🧶
+
+        {/* Right — video */}
+        <div style={{ flex: 1, position: 'relative', overflow: 'hidden', background: '#EDE6DA' }}>
+          <video
+            src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4"
+            autoPlay
+            muted
+            loop
+            playsInline
+            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+          />
+          <div style={{ position: 'absolute', bottom: '24px', right: '24px', background: 'rgba(248,245,240,0.88)', backdropFilter: 'blur(4px)', padding: '9px 16px', border: '1px solid #E4DBD0', fontSize: '11px', letterSpacing: '0.1em', color: '#6B6560', textTransform: 'uppercase' }}>
+            Handmade Crochet
           </div>
         </div>
       </section>
 
-      {/* Benefits bar */}
-      <div className="bg-[#1A1A18] text-[#F8F5F0] py-4">
-        <div className="max-w-6xl mx-auto px-6 flex flex-wrap justify-center gap-8 text-sm font-medium">
-          <span>✦ Handmade to order</span>
-          <span>✦ Ships pan-India</span>
-          <span>✦ Premium cotton yarn</span>
-          <span>✦ Secure Razorpay payments</span>
-        </div>
+      {/* ── BENEFITS BAR ── */}
+      <div style={{ background: '#F0EBE1', borderTop: '1px solid #E4DBD0', borderBottom: '1px solid #E4DBD0', padding: '20px 56px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        {[
+          { icon: '☕', label: '100% Handmade' },
+          { icon: '🛡️', label: 'Premium Quality' },
+          { icon: '❤️', label: 'Made to Order' },
+          { icon: '🌐', label: 'Worldwide Shipping' },
+        ].map(({ icon, label }, i, arr) => (
+          <div key={label} style={{ display: 'flex', alignItems: 'center' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '0 48px' }}>
+              <span style={{ fontSize: '18px' }}>{icon}</span>
+              <span style={{ fontSize: '10px', letterSpacing: '0.2em', textTransform: 'uppercase', fontWeight: 500, color: '#2A2520' }}>{label}</span>
+            </div>
+            {i < arr.length - 1 && <div style={{ width: '1px', height: '28px', background: '#D8D0C5' }} />}
+          </div>
+        ))}
       </div>
 
-      {/* Featured products */}
+      {/* ── BEST SELLERS ── */}
       {products.length > 0 && (
-        <section className="max-w-6xl mx-auto px-6 py-16">
-          <div className="flex items-end justify-between mb-10">
-            <div>
-              <p className="text-xs font-medium tracking-widest uppercase text-[#C9906A] mb-2">
-                Best Sellers
-              </p>
-              <h2 className="font-serif text-4xl text-[#1A1A18]">Fan Favourites</h2>
-            </div>
-            <Link
-              href="/shop"
-              className="text-sm font-medium underline underline-offset-4 hover:text-[#C9906A] transition-colors"
-            >
-              View all →
-            </Link>
+        <section style={{ padding: '80px 56px 96px', background: '#F8F5F0', maxWidth: '100%' }}>
+          <div style={{ textAlign: 'center', marginBottom: '48px' }}>
+            <span style={{ fontSize: '10px', letterSpacing: '0.24em', textTransform: 'uppercase', color: '#9A918A', display: 'block', marginBottom: '12px' }}>
+              Our Most Loved
+            </span>
+            <h2 style={{ fontFamily: 'var(--font-playfair, Georgia, serif)', fontSize: '34px', fontWeight: 500, color: '#1A1A18', letterSpacing: '-0.01em', margin: 0 }}>
+              Best Sellers
+            </h2>
           </div>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-            {products.map((p) => (
-              <ProductCard key={p.id} product={p} />
-            ))}
+          <div style={{ maxWidth: '1152px', margin: '0 auto' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '20px', marginBottom: '56px' }}>
+              {products.map((p) => (
+                <ProductCard key={p.id} product={p} />
+              ))}
+            </div>
+            <div style={{ textAlign: 'center' }}>
+              <Link
+                href="/shop"
+                style={{ display: 'inline-flex', alignItems: 'center', gap: '10px', border: '1.5px solid #1A1A18', color: '#1A1A18', padding: '12px 36px', fontSize: '10px', letterSpacing: '0.18em', textTransform: 'uppercase', fontWeight: 500, textDecoration: 'none' }}
+              >
+                View All Plushies
+              </Link>
+            </div>
           </div>
         </section>
       )}

@@ -1,7 +1,10 @@
 import { neon } from '@neondatabase/serverless'
 
-if (!process.env.DATABASE_URL) {
-  throw new Error('DATABASE_URL environment variable is not set')
-}
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const noopSql = async (..._args: any[]) => []
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+noopSql.transaction = async (..._args: any[]) => []
 
-export const sql = neon(process.env.DATABASE_URL)
+export const sql = process.env.DATABASE_URL
+  ? neon(process.env.DATABASE_URL)
+  : noopSql

@@ -69,7 +69,7 @@ export async function POST(req: NextRequest) {
   })
 
   await resend.emails.send({
-    from: 'PokéCraft Orders <orders@pokecraft.in>',
+    from: 'PokéCraft Orders <onboarding@resend.dev>',
     to: sellerEmail,
     subject: `New order #${order.id} — ${total}`,
     html: `

@@ -77,7 +77,25 @@ export default function CheckoutPage() {
         email: form.buyer_email,
         contact: form.buyer_phone,
       },
-      handler: () => {
+      handler: async (response: {
+        razorpay_payment_id: string
+        razorpay_order_id: string
+        razorpay_signature: string
+      }) => {
+        const verifyRes = await fetch('/api/verify-payment', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            razorpay_order_id: response.razorpay_order_id,
+            razorpay_payment_id: response.razorpay_payment_id,
+            razorpay_signature: response.razorpay_signature,
+          }),
+        })
+        if (!verifyRes.ok) {
+          alert('Payment verification failed. Please contact support with your payment ID: ' + response.razorpay_payment_id)
+          setLoading(false)
+          return
+        }
         clearCart()
         router.push(`/order/${data.orderId}`)
       },

@@ -19,7 +19,7 @@ export function StockBadge({ count }: Props) {
   }
   return (
     <span className="inline-block px-2 py-0.5 text-xs font-medium bg-green-100 text-green-700 rounded">
-      In Stock
+      In Stock ({count})
     </span>
   )
 }

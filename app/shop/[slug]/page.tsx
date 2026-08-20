@@ -5,6 +5,10 @@ import type { Product } from '@/types'
 import { StockBadge } from '@/components/StockBadge'
 import { CartButton } from '@/components/CartButton'
 
+function isVideo(url: string) {
+  return /\.(mp4|webm|ogg|mov)$/i.test(url)
+}
+
 async function getProduct(slug: string): Promise<Product | null> {
   const rows = await sql`SELECT * FROM products WHERE slug = ${slug} LIMIT 1`
   return (rows[0] as Product) ?? null
@@ -34,32 +38,68 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
     image: product.images[0] ?? '',
   }
 
+  const firstMedia = product.images[0] ?? null
+
   return (
-    <div className="max-w-5xl mx-auto px-6 py-12 grid md:grid-cols-2 gap-12">
-      {/* Image */}
-      <div className="aspect-square rounded-2xl bg-[#F0EAE0] overflow-hidden relative">
-        {product.images[0] ? (
-          <Image src={product.images[0]} alt={product.name} fill className="object-cover" />
+    <div style={{ maxWidth: '900px', margin: '0 auto', padding: '3rem 1.5rem', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '3rem', alignItems: 'start' }}>
+      {/* Media — image or video */}
+      <div style={{ borderRadius: '1.25rem', background: '#F0EAE0', overflow: 'hidden', aspectRatio: '1', position: 'relative' }}>
+        {firstMedia ? (
+          isVideo(firstMedia) ? (
+            <video
+              src={firstMedia}
+              controls
+              autoPlay
+              muted
+              loop
+              playsInline
+              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+            />
+          ) : (
+            <Image
+              src={firstMedia}
+              alt={product.name}
+              fill
+              style={{ objectFit: 'contain', padding: '1.5rem' }}
+            />
+          )
         ) : (
-          <div className="w-full h-full flex items-center justify-center text-8xl">🧶</div>
+          <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '6rem' }}>🧶</div>
         )}
       </div>
 
+      {/* Extra media thumbnails if more than 1 */}
+      {product.images.length > 1 && (
+        <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', gridColumn: '1', marginTop: '-2rem' }}>
+          {product.images.slice(1).map((url, i) => (
+            <div key={i} style={{ width: '4rem', height: '4rem', borderRadius: '0.5rem', background: '#F0EAE0', overflow: 'hidden', position: 'relative', flexShrink: 0 }}>
+              {isVideo(url) ? (
+                <video src={url} muted style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              ) : (
+                <Image src={url} alt={`${product.name} ${i + 2}`} fill style={{ objectFit: 'cover' }} />
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+
       {/* Info */}
-      <div className="flex flex-col justify-center">
-        <p className="text-xs font-medium tracking-widest uppercase text-[#C9906A] mb-3">
+      <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+        <p style={{ fontSize: '0.65rem', letterSpacing: '0.15em', textTransform: 'uppercase', color: '#C9906A', marginBottom: '0.75rem', fontWeight: 600 }}>
           {product.pokemon_name}
         </p>
-        <h1 className="font-serif text-4xl text-[#1A1A18] mb-3">{product.name}</h1>
-        <div className="flex items-center gap-3 mb-4">
-          <span className="text-2xl font-semibold">{rupees}</span>
+        <h1 style={{ fontFamily: 'var(--font-playfair, Georgia, serif)', fontSize: '2.5rem', color: '#1A1A18', marginBottom: '0.75rem', lineHeight: 1.2 }}>
+          {product.name}
+        </h1>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem' }}>
+          <span style={{ fontSize: '1.75rem', fontWeight: 600 }}>{rupees}</span>
           <StockBadge count={product.stock_count} />
         </div>
         {product.description && (
-          <p className="text-[#6B6560] leading-relaxed mb-8">{product.description}</p>
+          <p style={{ color: '#6B6560', lineHeight: 1.7, marginBottom: '2rem' }}>{product.description}</p>
         )}
         <CartButton item={cartItem} disabled={product.stock_count === 0} />
-        <p className="mt-4 text-xs text-[#6B6560] text-center">
+        <p style={{ marginTop: '1rem', fontSize: '0.75rem', color: '#6B6560', textAlign: 'center' }}>
           Handmade to order · Ships within 7–10 days · Pan-India delivery
         </p>
       </div>

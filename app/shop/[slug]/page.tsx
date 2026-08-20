@@ -6,6 +6,7 @@ import { StockBadge } from '@/components/StockBadge'
 
 export const dynamic = 'force-dynamic'
 import { CartButton } from '@/components/CartButton'
+import { WishlistButton } from '@/components/WishlistButton'
 
 function isVideo(url: string) {
   return /\.(mp4|webm|ogg|mov)$/i.test(url)
@@ -101,6 +102,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
           <p style={{ color: '#6B6560', lineHeight: 1.7, marginBottom: '2rem' }}>{product.description}</p>
         )}
         <CartButton item={cartItem} disabled={product.stock_count === 0} />
+        <WishlistButton productId={product.id} />
         <p style={{ marginTop: '1rem', fontSize: '0.75rem', color: '#6B6560', textAlign: 'center' }}>
           Handmade to order · Ships within 7–10 days · Pan-India delivery
         </p>

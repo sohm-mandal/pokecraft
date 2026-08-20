@@ -27,8 +27,9 @@ function EmailModal({ order, onClose }: { order: Order; onClose: () => void }) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ orderId: order.id, subject, message }),
     })
+    const data = await res.json().catch(() => ({}))
     if (res.ok) { setSent(true); setTimeout(onClose, 1500) }
-    else { alert('Failed to send email.'); setSending(false) }
+    else { alert(`Failed to send email: ${data.detail ?? data.error ?? res.status}`); setSending(false) }
   }
 
   return (

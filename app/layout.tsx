@@ -55,6 +55,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
           {/* Right icons */}
           <div style={{ display: 'flex', gap: '4px', alignItems: 'center', flexShrink: 0 }}>
+            <Link href="/account" style={{ width: '40px', height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#1A1A18', borderRadius: '50%', textDecoration: 'none' }}>
+              <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
+                <circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
+              </svg>
+            </Link>
             <CartIcon />
           </div>
         </header>

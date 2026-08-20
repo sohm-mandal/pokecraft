@@ -41,10 +41,12 @@ export async function POST(req: NextRequest) {
 
   if (!res.ok) {
     const err = await res.text()
-    return NextResponse.json({ error: err }, { status: res.status })
+    console.error('Gemini API error:', res.status, err)
+    return NextResponse.json({ text: `API error ${res.status}: ${err}` })
   }
 
   const data = await res.json()
-  const text = data.candidates?.[0]?.content?.parts?.[0]?.text ?? 'Sorry, I could not get a response. Please try again.'
+  console.log('Gemini response:', JSON.stringify(data).slice(0, 300))
+  const text = data.candidates?.[0]?.content?.parts?.[0]?.text ?? 'Sorry, I could not get a response.'
   return NextResponse.json({ text })
 }

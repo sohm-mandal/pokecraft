@@ -4,20 +4,26 @@ import { NextResponse } from 'next/server'
 export default auth((req) => {
   const { pathname } = req.nextUrl
   const role = (req.auth?.user as { role?: string })?.role
+  const isLoggedIn = !!req.auth
 
-  if (pathname.startsWith('/admin')) {
-    if (role !== 'admin') {
-      return NextResponse.redirect(new URL('/login?callbackUrl=/admin', req.url))
-    }
+  // Always allow login page and auth API
+  if (pathname.startsWith('/login') || pathname.startsWith('/api/auth')) {
+    return NextResponse.next()
   }
 
-  if (pathname.startsWith('/account')) {
-    if (!req.auth) {
-      return NextResponse.redirect(new URL('/login?callbackUrl=/account', req.url))
-    }
+  // Redirect unauthenticated users to login
+  if (!isLoggedIn) {
+    return NextResponse.redirect(new URL(`/login?callbackUrl=${pathname}`, req.url))
   }
+
+  // Admin only
+  if (pathname.startsWith('/admin') && role !== 'admin') {
+    return NextResponse.redirect(new URL('/', req.url))
+  }
+
+  return NextResponse.next()
 })
 
 export const config = {
-  matcher: ['/admin/:path*', '/account/:path*'],
+  matcher: ['/((?!_next/static|_next/image|favicon.ico|.*\\.png$|.*\\.jpg$|.*\\.svg$).*)'],
 }

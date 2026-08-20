@@ -62,10 +62,8 @@ export function AdminTopBar({ name, image, pendingOrderCount = 0 }: Props) {
       {/* Centre: nav */}
       <nav style={{ display: 'flex', alignItems: 'center', gap: '2px' }}>
         <NavLink href="/admin" label="Dashboard" />
-        <NavLink href="/admin#orders" label="Orders" />
-        <NavLink href="/admin#products" label="Products" />
-        <div style={{ width: '1px', height: '16px', background: 'rgba(255,255,255,0.1)', margin: '0 6px' }} />
-        <NavLink href="/shop" label="View Shop" />
+        <NavLink href="/admin/orders" label="Orders" />
+        <NavLink href="/admin/inventory" label="Inventory" />
         {pendingOrderCount > 0 && (
           <span style={{
             fontSize: '10px', fontWeight: 700, color: 'white', background: '#E05252',

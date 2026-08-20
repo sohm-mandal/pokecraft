@@ -52,7 +52,6 @@ export async function POST(req: NextRequest) {
 
     // Send seller notification email
     const sellerEmail = process.env.SELLER_EMAIL!
-    const items = order.items as OrderItem[]
     const itemList = items.map((i) => `${i.name} × ${i.quantity}`).join(', ')
     const total = (order.total_amount / 100).toLocaleString('en-IN', {
       style: 'currency',

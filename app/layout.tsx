@@ -3,10 +3,12 @@ import { Playfair_Display, Jost } from 'next/font/google'
 import Link from 'next/link'
 import Script from 'next/script'
 import { auth } from '@/auth'
+import { sql } from '@/lib/db'
 import { CartIcon } from '@/components/CartIcon'
 import { WishlistIcon } from '@/components/WishlistIcon'
 import { ChatWidget } from '@/components/ChatWidget'
 import { UserMenu } from '@/components/UserMenu'
+import { AdminTopBar } from '@/components/AdminTopBar'
 import './globals.css'
 
 const playfair = Playfair_Display({
@@ -32,6 +34,16 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const userName = session?.user?.name ?? 'Account'
   const userImage = session?.user?.image ?? null
   const userRole = (session?.user as { role?: string })?.role ?? 'guest'
+  const isAdmin = userRole === 'admin'
+
+  // Fetch pending order count for admin bar badge
+  let pendingOrderCount = 0
+  if (isAdmin) {
+    try {
+      const rows = await sql`SELECT COUNT(*) AS c FROM orders WHERE status = 'placed'`
+      pendingOrderCount = Number((rows[0] as { c: string }).c)
+    } catch { /* non-fatal */ }
+  }
 
   return (
     <html lang="en" className={`${playfair.variable} ${jost.variable}`}>
@@ -40,9 +52,15 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       </head>
       <body style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', background: '#F8F5F0', color: '#1A1A18', fontFamily: 'var(--font-jost, Jost, system-ui, sans-serif)', margin: 0 }}>
 
-        {loggedIn && (
+        {/* ── ADMIN BAR (admins only, replaces the customer header entirely) ── */}
+        {loggedIn && isAdmin && (
+          <AdminTopBar name={userName} image={userImage} pendingOrderCount={pendingOrderCount} />
+        )}
+
+        {/* ── CUSTOMER HEADER + NAV + RIBBON (non-admin logged-in users only) ── */}
+        {loggedIn && !isAdmin && (
           <>
-            {/* ── HEADER ── */}
+            {/* HEADER */}
             <header style={{ position: 'sticky', top: 0, zIndex: 100, background: 'rgba(248,245,240,0.96)', backdropFilter: 'blur(10px)', borderBottom: '1px solid #EAE3D9', height: '64px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 20px' }}>
 
               {/* Logo */}
@@ -74,7 +92,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
               </div>
             </header>
 
-            {/* ── MOBILE NAV ── */}
+            {/* MOBILE NAV */}
             <nav className="mobile-nav" style={{ background: '#F8F5F0', borderBottom: '1px solid #EAE3D9', overflowX: 'auto', whiteSpace: 'nowrap', padding: '0 16px' }}>
               <div style={{ display: 'inline-flex', gap: '0' }}>
                 {[['Shop', '/shop'], ['Collections', '/collections'], ['About', '/about'], ['Custom Orders', '/custom-orders'], ['FAQ', '/faq']].map(([label, href]) => (
@@ -85,7 +103,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
               </div>
             </nav>
 
-            {/* ── MARQUEE RIBBON ── */}
+            {/* MARQUEE RIBBON */}
             <div style={{ background: '#1A1A18', color: '#F8F5F0', padding: '10px 0', overflow: 'hidden', whiteSpace: 'nowrap' }}>
               <div style={{ display: 'inline-flex', animation: 'marquee 28s linear infinite' }}>
                 {[...Array(4)].map((_, i) => (
@@ -107,9 +125,10 @@ export default async function RootLayout({ children }: { children: React.ReactNo
 
         <main style={{ flex: 1 }}>{children}</main>
 
-        {loggedIn && (
+        {/* Footer/trust — only for non-admin logged-in users */}
+        {loggedIn && !isAdmin && (
           <>
-            {/* ── TRUST SECTION ── */}
+            {/* TRUST SECTION */}
             <section style={{ padding: '60px 20px', background: '#F0EBE1', borderTop: '1px solid #E4DBD0' }}>
               <div className="trust-grid" style={{ maxWidth: '1152px', margin: '0 auto' }}>
                 {[
@@ -127,7 +146,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
               </div>
             </section>
 
-            {/* ── FOOTER ── */}
+            {/* FOOTER */}
             <footer style={{ background: '#1A1A18', color: '#F8F5F0', padding: '32px 20px' }}>
               <div style={{ maxWidth: '1152px', margin: '0 auto', display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: '24px' }}>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>

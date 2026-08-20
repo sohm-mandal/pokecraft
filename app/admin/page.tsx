@@ -1,7 +1,9 @@
 import { sql } from '@/lib/db'
+import { auth } from '@/auth'
 import type { Order, Product } from '@/types'
 import { AdminOrders } from './AdminOrders'
 import { AdminProducts } from './AdminProducts'
+import { AdminTopBar } from './AdminTopBar'
 
 export const dynamic = 'force-dynamic'
 
@@ -14,9 +16,14 @@ async function getData() {
 }
 
 export default async function AdminPage() {
-  const { orders, products } = await getData()
+  const [{ orders, products }, session] = await Promise.all([getData(), auth()])
+  const adminName = session?.user?.name ?? 'Admin'
+  const adminImage = session?.user?.image ?? null
 
   return (
+    <div>
+      <AdminTopBar name={adminName} image={adminImage} orders={orders} />
+
     <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '40px 20px' }}>
       <div style={{ marginBottom: '40px' }}>
         <p style={{ fontSize: '10px', letterSpacing: '0.2em', textTransform: 'uppercase', color: '#C9906A', marginBottom: '8px' }}>Dashboard</p>
@@ -39,6 +46,7 @@ export default async function AdminPage() {
 
       <AdminOrders orders={orders} />
       <AdminProducts products={products} />
+    </div>
     </div>
   )
 }

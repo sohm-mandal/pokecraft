@@ -6,6 +6,7 @@ import { auth } from '@/auth'
 import { CartIcon } from '@/components/CartIcon'
 import { WishlistIcon } from '@/components/WishlistIcon'
 import { ChatWidget } from '@/components/ChatWidget'
+import { UserMenu } from '@/components/UserMenu'
 import './globals.css'
 
 const playfair = Playfair_Display({
@@ -28,6 +29,9 @@ export const metadata: Metadata = {
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const session = await auth()
   const loggedIn = !!session?.user
+  const userName = session?.user?.name ?? 'Account'
+  const userImage = session?.user?.image ?? null
+  const userRole = (session?.user as { role?: string })?.role ?? 'guest'
 
   return (
     <html lang="en" className={`${playfair.variable} ${jost.variable}`}>
@@ -62,13 +66,11 @@ export default async function RootLayout({ children }: { children: React.ReactNo
 
               {/* Right icons */}
               <div style={{ display: 'flex', gap: '4px', alignItems: 'center', flexShrink: 0 }}>
-                <Link href="/account" style={{ width: '40px', height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#1A1A18', borderRadius: '50%', textDecoration: 'none' }}>
-                  <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
-                    <circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
-                  </svg>
-                </Link>
                 <WishlistIcon />
                 <CartIcon />
+                <div style={{ marginLeft: '4px' }}>
+                  <UserMenu name={userName} image={userImage} role={userRole} />
+                </div>
               </div>
             </header>
 

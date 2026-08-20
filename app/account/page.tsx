@@ -8,8 +8,10 @@ export default async function AccountPage() {
   const session = await auth()
   if (!session?.user) redirect('/login')
 
-  const isGoogleUser = !session.user.email?.endsWith('@pokecraft.internal')
-  const sessionEmail = isGoogleUser ? (session.user.email ?? '') : ''
+  // Real email for Google users and OTP guests; @pokecraft.internal = staff account
+  const sessionEmail = session.user.email?.endsWith('@pokecraft.internal')
+    ? ''
+    : (session.user.email ?? '')
 
   return (
     <AccountClient

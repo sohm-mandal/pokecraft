@@ -16,8 +16,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'An account with this email already exists. Please sign in instead.' }, { status: 409 })
   }
 
-  if (mode === 'login' && !userExists) {
-    return NextResponse.json({ error: 'No account found with this email. Please create an account first.' }, { status: 404 })
+  if (mode === 'forgot-password' && !userExists) {
+    return NextResponse.json({ error: 'No account found with this email.' }, { status: 404 })
   }
 
   const code = Math.floor(100000 + Math.random() * 900000).toString()
@@ -33,11 +33,11 @@ export async function POST(req: NextRequest) {
     await mailer.sendMail({
       from: `PokéCraft <${process.env.GMAIL_USER}>`,
       to: normalised,
-      subject: `Your PokéCraft sign-in code: ${code}`,
+      subject: mode === 'forgot-password' ? `Your PokéCraft password reset code: ${code}` : `Your PokéCraft verification code: ${code}`,
       html: `
         <div style="font-family:sans-serif;max-width:480px;margin:0 auto;color:#1A1A18">
-          <h2 style="color:#C9906A">Your sign-in code 🧶</h2>
-          <p style="font-size:15px;color:#6B6560">Use this code to ${mode === 'signup' ? 'create your PokéCraft account' : 'sign in to PokéCraft'}. It expires in <strong>10 minutes</strong>.</p>
+          <h2 style="color:#C9906A">${mode === 'forgot-password' ? 'Reset your password 🔑' : 'Your verification code 🧶'}</h2>
+          <p style="font-size:15px;color:#6B6560">Use this code to ${mode === 'forgot-password' ? 'reset your PokéCraft password' : 'create your PokéCraft account'}. It expires in <strong>10 minutes</strong>.</p>
           <div style="background:#F8F5F0;border:1px solid #E4DBD0;border-radius:12px;padding:32px;text-align:center;margin:24px 0">
             <span style="font-size:2.5rem;font-weight:700;letter-spacing:0.2em;color:#1A1A18">${code}</span>
           </div>

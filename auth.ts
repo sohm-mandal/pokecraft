@@ -25,10 +25,14 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         `
         const user = rows[0] as { id: number; username: string; name: string; role: string } | undefined
         if (!user) return null
+        // If username is already a real email (OTP-created guests), use it directly
+        const email = user.username.includes('@') && !user.username.endsWith('@pokecraft.internal')
+          ? user.username
+          : `${user.username}@pokecraft.internal`
         return {
           id: String(user.id),
           name: user.name,
-          email: `${user.username}@pokecraft.internal`,
+          email,
           role: user.role,
         }
       },

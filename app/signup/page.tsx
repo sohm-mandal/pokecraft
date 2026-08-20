@@ -5,7 +5,7 @@ import { signIn } from 'next-auth/react'
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 
-type Step = 'email' | 'otp' | 'setup' | 'password'
+type Step = 'email' | 'otp' | 'setup'
 
 const inputStyle: React.CSSProperties = {
   border: '1.5px solid #E4DBD0', borderRadius: '12px', padding: '14px 16px',
@@ -20,7 +20,6 @@ const btnStyle: React.CSSProperties = {
 function SignupForm() {
   const searchParams = useSearchParams()
   const callbackUrl = searchParams.get('callbackUrl') ?? '/'
-  const mode = searchParams.get('mode') === 'signup' ? 'signup' : 'login'
 
   const [step, setStep] = useState<Step>('email')
   const [email, setEmail] = useState('')
@@ -33,14 +32,14 @@ function SignupForm() {
 
   const dest = callbackUrl === '/login' || callbackUrl === '/signup' ? '/' : callbackUrl
 
-  // Step 1 — send OTP
+  // Step 1 — send OTP for signup
   async function handleSendOtp(e: FormEvent) {
     e.preventDefault()
     setLoading(true); setError('')
     const res = await fetch('/api/auth/send-otp', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, mode }),
+      body: JSON.stringify({ email, mode: 'signup' }),
     })
     const data = await res.json()
     if (!res.ok) setError(data.error ?? 'Failed to send OTP.')
@@ -59,12 +58,11 @@ function SignupForm() {
     })
     const data = await res.json()
     if (!res.ok) { setError(data.error ?? 'Invalid code.'); setLoading(false); return }
-    // OTP verified — move to next step based on mode
-    setStep(mode === 'signup' ? 'setup' : 'password')
+    setStep('setup')
     setLoading(false)
   }
 
-  // Step 3a (signup) — create account then sign in
+  // Step 3 — create account then sign in
   async function handleSetup(e: FormEvent) {
     e.preventDefault()
     if (password !== confirmPassword) { setError('Passwords do not match.'); return }
@@ -79,23 +77,9 @@ function SignupForm() {
     const createData = await createRes.json()
     if (!createRes.ok) { setError(createData.error ?? 'Failed to create account.'); setLoading(false); return }
 
-    // Sign in with the new credentials
     const res = await signIn('credentials', { username: email, password, redirect: false })
     if (res?.error) { setError('Account created but sign-in failed. Please go to login.'); setLoading(false); return }
     window.location.href = dest
-  }
-
-  // Step 3b (login) — verify password and sign in
-  async function handlePasswordLogin(e: FormEvent) {
-    e.preventDefault()
-    setLoading(true); setError('')
-    const res = await signIn('credentials', { username: email, password, redirect: false })
-    if (res?.error) {
-      setError('Incorrect password. Please try again.')
-      setLoading(false)
-    } else {
-      window.location.href = dest
-    }
   }
 
   async function resendOtp() {
@@ -103,31 +87,16 @@ function SignupForm() {
     const res = await fetch('/api/auth/send-otp', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, mode }),
+      body: JSON.stringify({ email, mode: 'signup' }),
     })
     const data = await res.json()
     if (!res.ok) setError(data.error ?? 'Failed to resend.')
   }
 
   const headings: Record<Step, { eyebrow: string; title: string; subtitle?: string }> = {
-    email: {
-      eyebrow: mode === 'signup' ? 'New Account' : 'Welcome Back',
-      title: mode === 'signup' ? 'Create your account' : 'Sign in to PokéCraft',
-    },
-    otp: {
-      eyebrow: 'Verify Email',
-      title: 'Check your inbox',
-      subtitle: `We sent a 6-digit code to ${email}`,
-    },
-    setup: {
-      eyebrow: 'Almost there',
-      title: 'Set up your account',
-    },
-    password: {
-      eyebrow: 'Welcome back',
-      title: 'Enter your password',
-      subtitle: `Signing in as ${email}`,
-    },
+    email: { eyebrow: 'New Account', title: 'Create your account' },
+    otp: { eyebrow: 'Verify Email', title: 'Check your inbox', subtitle: `We sent a 6-digit code to ${email}` },
+    setup: { eyebrow: 'Almost there', title: 'Set up your account' },
   }
 
   const h = headings[step]
@@ -135,7 +104,6 @@ function SignupForm() {
   return (
     <div style={{ minHeight: '80vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '40px 20px' }}>
       <div style={{ width: '100%', maxWidth: '400px' }}>
-        {/* Header */}
         <div style={{ textAlign: 'center', marginBottom: '36px' }}>
           <p style={{ fontSize: '10px', letterSpacing: '0.2em', textTransform: 'uppercase', color: '#C9906A', marginBottom: '12px' }}>{h.eyebrow}</p>
           <h1 style={{ fontFamily: 'var(--font-playfair, Georgia, serif)', fontSize: '2rem', color: '#1A1A18', margin: 0 }}>{h.title}</h1>
@@ -148,13 +116,11 @@ function SignupForm() {
             <input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="Your email address" required style={inputStyle} />
             {error && <p style={{ color: '#E05252', fontSize: '13px', margin: 0 }}>{error}</p>}
             <button type="submit" disabled={loading} style={{ ...btnStyle, opacity: loading ? 0.6 : 1 }}>
-              {loading ? 'Sending code…' : 'Send OTP'}
+              {loading ? 'Sending code…' : 'Send Verification Code'}
             </button>
             <p style={{ textAlign: 'center', fontSize: '13px', color: '#9A918A', marginTop: '8px' }}>
-              {mode === 'signup' ? 'Already have an account? ' : 'New here? '}
-              <Link href={`/signup?callbackUrl=${encodeURIComponent(callbackUrl)}&mode=${mode === 'signup' ? 'login' : 'signup'}`} style={{ color: '#C9906A', textDecoration: 'none', fontWeight: 500 }}>
-                {mode === 'signup' ? 'Sign in' : 'Create an account'}
-              </Link>
+              Already have an account?{' '}
+              <Link href="/login" style={{ color: '#C9906A', textDecoration: 'none', fontWeight: 500 }}>Sign in</Link>
             </p>
           </form>
         )}
@@ -187,29 +153,15 @@ function SignupForm() {
           </form>
         )}
 
-        {/* Step 3a — Setup (signup only) */}
+        {/* Step 3 — Setup */}
         {step === 'setup' && (
           <form onSubmit={handleSetup} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
             <input type="text" value={name} onChange={e => setName(e.target.value)} placeholder="Your full name" required style={inputStyle} />
-            <input type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="Choose a password (min 6 chars)" required minLength={6} style={inputStyle} />
-            <input type="password" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} placeholder="Confirm password" required style={inputStyle} />
+            <input type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="Choose a password (min 6 chars)" required minLength={6} style={inputStyle} autoComplete="new-password" />
+            <input type="password" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} placeholder="Confirm password" required style={inputStyle} autoComplete="new-password" />
             {error && <p style={{ color: '#E05252', fontSize: '13px', margin: 0 }}>{error}</p>}
             <button type="submit" disabled={loading} style={{ ...btnStyle, opacity: loading ? 0.6 : 1 }}>
               {loading ? 'Creating account…' : 'Create Account & Sign In'}
-            </button>
-          </form>
-        )}
-
-        {/* Step 3b — Password (login only) */}
-        {step === 'password' && (
-          <form onSubmit={handlePasswordLogin} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-            <input type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="Your password" required style={inputStyle} />
-            {error && <p style={{ color: '#E05252', fontSize: '13px', margin: 0 }}>{error}</p>}
-            <button type="submit" disabled={loading} style={{ ...btnStyle, opacity: loading ? 0.6 : 1 }}>
-              {loading ? 'Signing in…' : 'Sign In'}
-            </button>
-            <button type="button" onClick={() => { setStep('email'); setPassword(''); setError('') }} style={{ background: 'none', border: 'none', color: '#9A918A', fontSize: '13px', cursor: 'pointer', fontFamily: 'inherit' }}>
-              ← Back
             </button>
           </form>
         )}

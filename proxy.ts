@@ -7,7 +7,7 @@ export default auth((req) => {
   const isLoggedIn = !!req.auth
 
   // Always allow login page and auth API
-  if (pathname.startsWith('/login') || pathname.startsWith('/signup') || pathname.startsWith('/api/auth')) {
+  if (pathname.startsWith('/login') || pathname.startsWith('/signup') || pathname.startsWith('/forgot-password') || pathname.startsWith('/api/auth')) {
     return NextResponse.next()
   }
 

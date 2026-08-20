@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import crypto from 'crypto'
 import { sql } from '@/lib/db'
-import { resend } from '@/lib/resend'
+import { mailer } from '@/lib/mailer'
 import type { Order, OrderItem } from '@/types'
 
 interface VerifyBody {
@@ -59,9 +59,12 @@ export async function POST(req: NextRequest) {
       minimumFractionDigits: 0,
     })
 
+    const addr = order.shipping_address as { line1: string; line2?: string; city: string; state: string; pincode: string }
+
     try {
-      await resend.emails.send({
-        from: 'PokéCraft Orders <onboarding@resend.dev>',
+      // Seller notification
+      await mailer.sendMail({
+        from: `PokéCraft Orders <${process.env.GMAIL_USER}>`,
         to: sellerEmail,
         subject: `New order #${order.id} — ${total}`,
         html: `
@@ -74,14 +77,53 @@ export async function POST(req: NextRequest) {
           <p><strong>Payment ID:</strong> ${razorpay_payment_id}</p>
           <hr/>
           <p><strong>Shipping Address:</strong><br/>
-            ${(order.shipping_address as { line1: string; line2?: string; city: string; state: string; pincode: string }).line1}<br/>
-            ${(order.shipping_address as { line2?: string }).line2 ? (order.shipping_address as { line2: string }).line2 + '<br/>' : ''}
-            ${(order.shipping_address as { city: string; state: string; pincode: string }).city}, ${(order.shipping_address as { state: string }).state} — ${(order.shipping_address as { pincode: string }).pincode}
+            ${addr.line1}<br/>
+            ${addr.line2 ? addr.line2 + '<br/>' : ''}
+            ${addr.city}, ${addr.state} — ${addr.pincode}
           </p>
         `,
       })
     } catch (e) {
-      console.error('Failed to send order email:', e)
+      console.error('Failed to send seller email:', e)
+    }
+
+    try {
+      // Customer confirmation
+      await mailer.sendMail({
+        from: `PokéCraft <${process.env.GMAIL_USER}>`,
+        to: order.buyer_email,
+        subject: `Your PokéCraft order #${order.id} is confirmed!`,
+        html: `
+          <div style="font-family:sans-serif;max-width:520px;margin:0 auto;color:#1A1A18">
+            <h2 style="color:#C9906A">Thank you, ${order.buyer_name}! 🧶</h2>
+            <p>Your order has been confirmed and we're already getting started on your handmade plushie.</p>
+            <table style="width:100%;border-collapse:collapse;margin:24px 0">
+              <tr style="background:#F8F5F0">
+                <td style="padding:10px 14px;font-size:13px"><strong>Order</strong></td>
+                <td style="padding:10px 14px;font-size:13px">#${order.id}</td>
+              </tr>
+              <tr>
+                <td style="padding:10px 14px;font-size:13px"><strong>Items</strong></td>
+                <td style="padding:10px 14px;font-size:13px">${itemList}</td>
+              </tr>
+              <tr style="background:#F8F5F0">
+                <td style="padding:10px 14px;font-size:13px"><strong>Total</strong></td>
+                <td style="padding:10px 14px;font-size:13px">${total}</td>
+              </tr>
+              <tr>
+                <td style="padding:10px 14px;font-size:13px"><strong>Ships to</strong></td>
+                <td style="padding:10px 14px;font-size:13px">${addr.line1}, ${addr.city}, ${addr.state} — ${addr.pincode}</td>
+              </tr>
+            </table>
+            <p style="font-size:13px;color:#6B6560">Expected delivery: <strong>7–10 business days</strong></p>
+            <p style="font-size:13px;color:#6B6560">Questions? Reply to this email or contact us at ${sellerEmail}</p>
+            <hr style="border:none;border-top:1px solid #E4DBD0;margin:24px 0"/>
+            <p style="font-size:11px;color:#9A918A;text-align:center">PokéCraft — Handmade with love ♥</p>
+          </div>
+        `,
+      })
+    } catch (e) {
+      console.error('Failed to send customer email:', e)
     }
   }
 

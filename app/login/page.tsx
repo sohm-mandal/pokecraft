@@ -84,13 +84,7 @@ function LoginForm() {
           max-width: 420px;
           position: relative;
           z-index: 1;
-          background: rgba(253, 250, 247, 0.88);
-          backdrop-filter: blur(12px);
-          -webkit-backdrop-filter: blur(12px);
-          border: 1px solid var(--color-border);
-          border-radius: 20px;
           padding: 44px 40px 40px;
-          box-shadow: 0 8px 40px rgba(26,26,24,0.07);
         }
 
         .login-eyebrow {

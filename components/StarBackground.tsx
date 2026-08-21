@@ -24,17 +24,17 @@ export function StarBackground() {
         const x = Math.random() * canvas.width
         const y = Math.random() * canvas.height
         const size = Math.random()
-        const opacity = Math.random() * 0.18 + 0.04
+        const opacity = Math.random() * 0.28 + 0.12
 
         if (size > 0.93) {
           // Sparkle cross
-          const r = Math.random() * 2 + 2
-          const o = opacity + 0.08
+          const r = Math.random() * 4 + 3
+          const o = opacity + 0.25
           ctx.save()
           ctx.translate(x, y)
           ctx.rotate(Math.random() * Math.PI)
           ctx.strokeStyle = `rgba(180, 130, 70, ${o})`
-          ctx.lineWidth = 0.8
+          ctx.lineWidth = 1.2
           ctx.beginPath()
           ctx.moveTo(-r, 0); ctx.lineTo(r, 0)
           ctx.moveTo(0, -r); ctx.lineTo(0, r)
@@ -42,17 +42,17 @@ export function StarBackground() {
           ctx.restore()
         } else if (size > 0.75) {
           // Medium dot
-          const r = Math.random() * 1.2 + 0.8
+          const r = Math.random() * 2 + 1.5
           ctx.beginPath()
           ctx.arc(x, y, r, 0, Math.PI * 2)
-          ctx.fillStyle = `rgba(160, 110, 55, ${opacity + 0.06})`
+          ctx.fillStyle = `rgba(160, 110, 55, ${opacity + 0.2})`
           ctx.fill()
         } else {
           // Small dot
-          const r = Math.random() * 0.8 + 0.3
+          const r = Math.random() * 1.4 + 0.8
           ctx.beginPath()
           ctx.arc(x, y, r, 0, Math.PI * 2)
-          ctx.fillStyle = `rgba(26, 26, 24, ${opacity})`
+          ctx.fillStyle = `rgba(26, 26, 24, ${opacity + 0.1})`
           ctx.fill()
         }
       }

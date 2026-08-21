@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, FormEvent, Suspense } from 'react'
+import { useState, FormEvent, Suspense, useEffect, useRef } from 'react'
 import { signIn } from 'next-auth/react'
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
@@ -74,12 +74,41 @@ function SignupForm() {
   const [name, setName] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
+  const [username, setUsername] = useState('')
+  const [usernameStatus, setUsernameStatus] = useState<'idle' | 'checking' | 'available' | 'taken' | 'invalid'>('idle')
+  const usernameTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirm, setShowConfirm] = useState(false)
 
   const dest = callbackUrl === '/login' || callbackUrl === '/signup' ? '/' : callbackUrl
+
+  function handleUsernameChange(value: string) {
+    const cleaned = value.toLowerCase().replace(/[^a-z0-9_]/g, '')
+    setUsername(cleaned)
+
+    if (usernameTimer.current) clearTimeout(usernameTimer.current)
+
+    if (!cleaned) { setUsernameStatus('idle'); return }
+    if (cleaned.length < 3) { setUsernameStatus('invalid'); return }
+    if (!/^[a-z0-9_]+$/.test(cleaned)) { setUsernameStatus('invalid'); return }
+
+    setUsernameStatus('checking')
+    usernameTimer.current = setTimeout(async () => {
+      try {
+        const res = await fetch(`/api/auth/check-username?username=${encodeURIComponent(cleaned)}`)
+        const data = await res.json()
+        if (data.available === true) setUsernameStatus('available')
+        else if (data.reason === 'invalid_chars' || data.reason === 'too_short' || data.reason === 'too_long') setUsernameStatus('invalid')
+        else setUsernameStatus('taken')
+      } catch {
+        setUsernameStatus('idle')
+      }
+    }, 450)
+  }
+
+  useEffect(() => () => { if (usernameTimer.current) clearTimeout(usernameTimer.current) }, [])
 
   async function handleSendOtp(e: FormEvent) {
     e.preventDefault()
@@ -121,6 +150,10 @@ function SignupForm() {
 
   async function handleSetup(e: FormEvent) {
     e.preventDefault()
+    if (!username || username.length < 3) { setError('Please choose a username (min 3 characters).'); return }
+    if (usernameStatus === 'taken') { setError('That username is already taken. Please choose another.'); return }
+    if (usernameStatus === 'invalid') { setError('Username can only contain letters, numbers, and underscores.'); return }
+    if (usernameStatus === 'checking') { setError('Still checking username availability — please wait a moment.'); return }
     if (password !== confirmPassword) { setError('Passwords do not match.'); return }
     if (password.length < 6) { setError('Password must be at least 6 characters.'); return }
     setLoading(true); setError('')
@@ -128,7 +161,7 @@ function SignupForm() {
       const createRes = await fetch('/api/auth/complete-signup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, name, password }),
+        body: JSON.stringify({ email, name, username, password }),
       })
       const createData = await createRes.json()
       if (!createRes.ok) { setError(createData.error ?? 'Failed to create account.'); return }
@@ -218,6 +251,49 @@ function SignupForm() {
         {step === 'setup' && (
           <form onSubmit={handleSetup} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
             <input type="text" value={name} onChange={e => setName(e.target.value)} placeholder="Your full name" required style={inputStyle} />
+
+            {/* Username */}
+            <div>
+              <div style={{ position: 'relative' }}>
+                <input
+                  type="text"
+                  value={username}
+                  onChange={e => handleUsernameChange(e.target.value)}
+                  placeholder="Choose a username"
+                  required
+                  maxLength={30}
+                  autoComplete="username"
+                  style={{
+                    ...inputStyle,
+                    paddingRight: '36px',
+                    borderColor:
+                      usernameStatus === 'available' ? '#4CAF50' :
+                      usernameStatus === 'taken' || usernameStatus === 'invalid' ? 'var(--color-error)' :
+                      'var(--color-border)',
+                  }}
+                />
+                {/* Status indicator */}
+                <span style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', fontSize: '14px', lineHeight: 1 }}>
+                  {usernameStatus === 'checking' && <span style={{ color: 'var(--color-muted)' }}>…</span>}
+                  {usernameStatus === 'available' && <span style={{ color: '#4CAF50' }}>✓</span>}
+                  {usernameStatus === 'taken' && <span style={{ color: 'var(--color-error)' }}>✗</span>}
+                  {usernameStatus === 'invalid' && <span style={{ color: 'var(--color-error)' }}>✗</span>}
+                </span>
+              </div>
+              <p style={{ fontSize: '11px', color:
+                usernameStatus === 'available' ? '#4CAF50' :
+                usernameStatus === 'taken' ? 'var(--color-error)' :
+                usernameStatus === 'invalid' ? 'var(--color-error)' :
+                'var(--color-muted)',
+                margin: '5px 0 0', lineHeight: 1.4,
+              }}>
+                {usernameStatus === 'idle' && 'No spaces. Letters, numbers, and underscores only. Must be unique.'}
+                {usernameStatus === 'checking' && 'Checking availability…'}
+                {usernameStatus === 'available' && `@${username} is available!`}
+                {usernameStatus === 'taken' && `@${username} is already taken. Try another.`}
+                {usernameStatus === 'invalid' && 'No spaces allowed. Use letters (a–z), numbers, and underscores. Min 3 chars.'}
+              </p>
+            </div>
 
             <div style={{ position: 'relative' }}>
               <input

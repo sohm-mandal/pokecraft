@@ -14,8 +14,10 @@ export const ProductRepository = {
 
   async findByIds(ids: number[]): Promise<Product[]> {
     if (!ids.length) return []
-    const rows = await sql`SELECT * FROM products WHERE id = ANY(${ids})`
-    return rows as Product[]
+    const results = await Promise.all(
+      ids.map(id => sql`SELECT * FROM products WHERE id = ${id} LIMIT 1`)
+    )
+    return results.flat().filter(Boolean) as Product[]
   },
 
   async insert(data: {

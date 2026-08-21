@@ -119,13 +119,19 @@ export function AccountClient({ name, image, sessionEmail }: Props) {
   async function fetchOrders(emailToSearch: string) {
     if (!emailToSearch) return
     setLoadingOrders(true)
+    const controller = new AbortController()
+    const timeout = setTimeout(() => controller.abort(), 12000)
     try {
-      const res = await fetch(`/api/orders/by-email?email=${encodeURIComponent(emailToSearch)}`)
+      const res = await fetch(
+        `/api/orders/by-email?email=${encodeURIComponent(emailToSearch)}`,
+        { signal: controller.signal }
+      )
       if (res.ok) setOrders(await res.json())
       else setOrders([])
     } catch {
       setOrders([])
     } finally {
+      clearTimeout(timeout)
       setLoadingOrders(false)
     }
   }

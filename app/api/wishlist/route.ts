@@ -13,8 +13,12 @@ export async function GET() {
   const email = session?.user?.email
   if (!email) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const products = await WishlistService.getWishlist(email)
-  return NextResponse.json(products)
+  try {
+    const products = await WishlistService.getWishlist(email)
+    return NextResponse.json(products)
+  } catch {
+    return NextResponse.json([], { status: 200 })
+  }
 }
 
 export async function POST(req: NextRequest) {

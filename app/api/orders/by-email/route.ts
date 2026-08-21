@@ -9,8 +9,12 @@ export async function GET(req: NextRequest) {
   const email = req.nextUrl.searchParams.get('email')
   if (!email) return NextResponse.json({ error: 'Missing email' }, { status: 400 })
 
-  const rows = await sql`
-    SELECT * FROM orders WHERE buyer_email = ${email} ORDER BY created_at DESC
-  `
-  return NextResponse.json(rows)
+  try {
+    const rows = await sql`
+      SELECT * FROM orders WHERE buyer_email = ${email} ORDER BY created_at DESC
+    `
+    return NextResponse.json(rows)
+  } catch {
+    return NextResponse.json([], { status: 200 })
+  }
 }

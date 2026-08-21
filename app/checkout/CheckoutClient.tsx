@@ -36,8 +36,8 @@ export function CheckoutClient({ sessionEmail, sessionName }: Props) {
   })
 
   useEffect(() => {
-    if (items.length === 0) router.replace('/cart')
-  }, [items.length, router])
+    if (!loading && items.length === 0) router.replace('/cart')
+  }, [loading, items.length, router])
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
     setForm(prev => ({ ...prev, [e.target.name]: e.target.value }))

@@ -14,8 +14,12 @@ export async function GET() {
   const email = session?.user?.email
   if (!email) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const items = await CartService.getCart(email)
-  return NextResponse.json(items)
+  try {
+    const items = await CartService.getCart(email)
+    return NextResponse.json(items)
+  } catch {
+    return NextResponse.json([], { status: 200 })
+  }
 }
 
 export async function POST(req: NextRequest) {
@@ -41,6 +45,8 @@ export async function DELETE() {
   const email = session?.user?.email
   if (!email) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  await CartService.clearCart(email)
+  try {
+    await CartService.clearCart(email)
+  } catch { /* non-fatal */ }
   return NextResponse.json({ ok: true })
 }

@@ -1,12 +1,18 @@
 import { WishlistRepository } from '@/lib/repositories/WishlistRepository'
-import { ProductRepository } from '@/lib/repositories/ProductRepository'
+import { sql } from '@/lib/db'
 import type { Product } from '@/types'
 
 export const WishlistService = {
   async getWishlist(email: string): Promise<Product[]> {
-    const ids = await WishlistRepository.getProductIds(email)
-    if (!ids.length) return []
-    return ProductRepository.findByIds(ids)
+    // Single JOIN query — avoids the ANY($1::int[]) Neon HTTP driver issue
+    const rows = await sql`
+      SELECT p.*
+      FROM products p
+      JOIN wishlist w ON w.product_id = p.id
+      WHERE w.user_email = ${email}
+      ORDER BY w.created_at ASC
+    `
+    return rows as Product[]
   },
 
   getProductIds(email: string): Promise<number[]> {

@@ -1,21 +1,10 @@
 'use client'
 
-import { useEffect, useState } from 'react'
 import Link from 'next/link'
+import { useWishlist } from '@/lib/context/WishlistContext'
 
 export function WishlistIcon() {
-  const [count, setCount] = useState(0)
-
-  useEffect(() => {
-    function sync() {
-      const list: number[] = JSON.parse(localStorage.getItem('pokecraft_wishlist') ?? '[]')
-      setCount(list.length)
-    }
-    sync()
-    window.addEventListener('storage', sync)
-    const id = setInterval(sync, 1000)
-    return () => { window.removeEventListener('storage', sync); clearInterval(id) }
-  }, [])
+  const { count } = useWishlist()
 
   return (
     <Link href="/account" style={{ width: '40px', height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#1A1A18', borderRadius: '50%', textDecoration: 'none', position: 'relative' }}>

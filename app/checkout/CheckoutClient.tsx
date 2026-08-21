@@ -2,7 +2,7 @@
 
 import { useEffect, FormEvent, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { useCartStore, useCartHydrated } from '@/lib/stores/cartStore'
+import { useCart } from '@/lib/context/CartContext'
 
 declare global {
   interface Window {
@@ -21,8 +21,7 @@ const inputCls = 'w-full border border-[#E5DDD4] rounded-xl px-4 py-3 bg-white f
 
 export function CheckoutClient({ sessionEmail, sessionName }: Props) {
   const router = useRouter()
-  const hydrated = useCartHydrated()
-  const { items, clearCart, getTotal } = useCartStore()
+  const { items, clearCart, getTotal } = useCart()
   const [loading, setLoading] = useState(false)
   const [paymentMode, setPaymentMode] = useState<PaymentMode>('online')
   const [form, setForm] = useState({
@@ -37,8 +36,8 @@ export function CheckoutClient({ sessionEmail, sessionName }: Props) {
   })
 
   useEffect(() => {
-    if (hydrated && items.length === 0) router.replace('/cart')
-  }, [hydrated, items.length, router])
+    if (items.length === 0) router.replace('/cart')
+  }, [items.length, router])
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
     setForm(prev => ({ ...prev, [e.target.name]: e.target.value }))

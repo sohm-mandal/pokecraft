@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import type { Order, OrderItem, Product, ShippingAddress } from '@/types'
+import { useWishlist } from '@/lib/context/WishlistContext'
+import type { Order, OrderItem, ShippingAddress } from '@/types'
 
 interface Props {
   name: string
@@ -109,22 +110,7 @@ export function AccountClient({ name, image, sessionEmail }: Props) {
   const [orders, setOrders] = useState<Order[] | null>(null)
   const [loadingOrders, setLoadingOrders] = useState(false)
   const [expandedId, setExpandedId] = useState<number | null>(null)
-  const [wishlist, setWishlist] = useState<Product[]>([])
-
-  useEffect(() => {
-    async function loadWishlist() {
-      try {
-        const ids: number[] = JSON.parse(localStorage.getItem('pokecraft_wishlist') ?? '[]')
-        if (!ids.length) { setWishlist([]); return }
-        const res = await fetch(`/api/wishlist?ids=${ids.join(',')}`)
-        if (res.ok) setWishlist(await res.json())
-        else setWishlist([])
-      } catch {
-        setWishlist([])
-      }
-    }
-    loadWishlist()
-  }, [])
+  const { products: wishlist, removeItem: removeFromWishlist } = useWishlist()
 
   useEffect(() => {
     if (sessionEmail) fetchOrders(sessionEmail)
@@ -142,12 +128,6 @@ export function AccountClient({ name, image, sessionEmail }: Props) {
     } finally {
       setLoadingOrders(false)
     }
-  }
-
-  function removeFromWishlist(productId: number) {
-    const ids: number[] = JSON.parse(localStorage.getItem('pokecraft_wishlist') ?? '[]')
-    localStorage.setItem('pokecraft_wishlist', JSON.stringify(ids.filter((id) => id !== productId)))
-    setWishlist((prev) => prev.filter((p) => p.id !== productId))
   }
 
   return (

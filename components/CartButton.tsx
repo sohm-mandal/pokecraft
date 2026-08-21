@@ -1,18 +1,17 @@
 'use client'
 
 import Link from 'next/link'
-import { useCartStore } from '@/lib/stores/cartStore'
-import type { CartItem } from '@/types'
+import { useCart } from '@/lib/context/CartContext'
 
 interface Props {
-  item: CartItem
+  productId: number
   stockCount: number
   disabled?: boolean
 }
 
-export function CartButton({ item, stockCount, disabled = false }: Props) {
-  const { items, addItem } = useCartStore()
-  const inCart = items.some(i => i.productId === item.productId)
+export function CartButton({ productId, stockCount, disabled = false }: Props) {
+  const { inCart, addItem } = useCart()
+  const isInCart = inCart(productId)
 
   if (disabled) {
     return (
@@ -22,7 +21,7 @@ export function CartButton({ item, stockCount, disabled = false }: Props) {
     )
   }
 
-  if (inCart) {
+  if (isInCart) {
     return (
       <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
         <div style={{ width: '100%', padding: '14px', borderRadius: '12px', background: '#EAF6EF', border: '1.5px solid #2D9E6B', textAlign: 'center', fontSize: '13px', fontWeight: 600, color: '#2D9E6B', letterSpacing: '0.04em', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
@@ -45,7 +44,7 @@ export function CartButton({ item, stockCount, disabled = false }: Props) {
 
   return (
     <button
-      onClick={() => addItem({ ...item, quantity: 1, stockCount }, stockCount)}
+      onClick={() => addItem(productId, 1)}
       style={{ width: '100%', padding: '14px', borderRadius: '12px', background: '#1A1A18', color: '#F8F5F0', border: 'none', fontSize: '13px', fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase', cursor: 'pointer', fontFamily: 'inherit', transition: 'background 0.15s' }}
       onMouseEnter={e => (e.currentTarget.style.background = '#C9906A')}
       onMouseLeave={e => (e.currentTarget.style.background = '#1A1A18')}

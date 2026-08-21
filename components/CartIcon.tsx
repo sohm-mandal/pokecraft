@@ -1,10 +1,11 @@
 'use client'
 
 import Link from 'next/link'
-import { useCartStore } from '@/lib/stores/cartStore'
+import { useCart } from '@/lib/context/CartContext'
 
 export function CartIcon() {
-  const count = useCartStore(state => state.getCount())
+  const { getCount } = useCart()
+  const count = getCount()
 
   return (
     <Link href="/cart" style={{ width: '40px', height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#1A1A18', borderRadius: '50%', position: 'relative', textDecoration: 'none' }}>

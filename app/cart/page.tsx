@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { useCartStore, useCartHydrated } from '@/lib/stores/cartStore'
+import { useCart } from '@/lib/context/CartContext'
 import type { CartItem } from '@/types'
 
 function fmt(paise: number) {
@@ -88,10 +88,15 @@ function CartRow({ item, onRemove, onQty }: { item: CartItem; onRemove: () => vo
 }
 
 export default function CartPage() {
-  const hydrated = useCartHydrated()
-  const { items, removeItem, updateQuantity, getTotal } = useCartStore()
+  const { items, loading, removeItem, updateQuantity, getTotal } = useCart()
 
-  if (!hydrated) return null
+  if (loading) {
+    return (
+      <div style={{ maxWidth: '480px', margin: '0 auto', padding: '80px 24px', textAlign: 'center', color: '#9A918A', fontSize: '15px' }}>
+        Loading cart…
+      </div>
+    )
+  }
 
   const total = getTotal()
   const freeShipping = total >= 50000
@@ -102,7 +107,7 @@ export default function CartPage() {
       <div style={{ maxWidth: '480px', margin: '0 auto', padding: '80px 24px', textAlign: 'center' }}>
         <div style={{ fontSize: '64px', marginBottom: '20px', lineHeight: 1 }}>🧺</div>
         <h1 style={{ fontFamily: 'var(--font-playfair, Georgia, serif)', fontSize: '2rem', color: '#1A1A18', margin: '0 0 10px' }}>Your cart is empty</h1>
-        <p style={{ color: '#9A918A', fontSize: '15px', margin: '0 0 32px', lineHeight: 1.6 }}>Looks like you haven't added any plushies yet.</p>
+        <p style={{ color: '#9A918A', fontSize: '15px', margin: '0 0 32px', lineHeight: 1.6 }}>Looks like you haven&apos;t added any plushies yet.</p>
         <Link href="/shop" style={{
           display: 'inline-block', background: '#1A1A18', color: '#F8F5F0',
           padding: '14px 36px', borderRadius: '100px', textDecoration: 'none',
@@ -140,7 +145,7 @@ export default function CartPage() {
               key={item.productId}
               item={item}
               onRemove={() => removeItem(item.productId)}
-              onQty={qty => qty < 1 ? removeItem(item.productId) : updateQuantity(item.productId, qty)}
+              onQty={qty => updateQuantity(item.productId, qty)}
             />
           ))}
         </div>

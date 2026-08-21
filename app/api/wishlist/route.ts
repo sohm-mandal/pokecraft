@@ -1,23 +1,30 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { sql } from '@/lib/db'
-import type { Product } from '@/types'
+import { auth } from '@/auth'
+import { WishlistService } from '@/lib/services/WishlistService'
+import { parseBody } from '@/lib/schemas'
+import { z } from 'zod'
 
-export async function GET(req: NextRequest) {
-  const idsParam = req.nextUrl.searchParams.get('ids')
-  if (!idsParam) return NextResponse.json([])
+const AddWishlistSchema = z.object({
+  productId: z.number().int().positive(),
+})
 
-  const ids = idsParam.split(',').map(Number).filter(n => Number.isInteger(n) && n > 0)
-  if (!ids.length) return NextResponse.json([])
+export async function GET() {
+  const session = await auth()
+  const email = session?.user?.email
+  if (!email) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  // Fetch each product individually and collect results — avoids ANY($1::int[])
-  // array parameter serialization issues with the Neon HTTP driver
-  const results = await Promise.all(
-    ids.map(id => sql`SELECT * FROM products WHERE id = ${id} LIMIT 1`)
-  )
-
-  const products = results
-    .flat()
-    .filter(Boolean) as Product[]
-
+  const products = await WishlistService.getWishlist(email)
   return NextResponse.json(products)
+}
+
+export async function POST(req: NextRequest) {
+  const session = await auth()
+  const email = session?.user?.email
+  if (!email) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+  const parsed = parseBody(AddWishlistSchema, await req.json())
+  if (!parsed.success) return NextResponse.json({ error: parsed.error }, { status: 400 })
+
+  await WishlistService.addItem(email, parsed.data.productId)
+  return NextResponse.json({ ok: true })
 }

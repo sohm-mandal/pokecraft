@@ -33,13 +33,6 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
     minimumFractionDigits: 0,
   })
 
-  const cartItem = {
-    productId: product.id,
-    name: product.name,
-    price: product.price,
-    quantity: 1,
-    image: product.images[0] ?? '',
-  }
 
   const firstMedia = product.images[0] ?? null
 
@@ -101,7 +94,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
         {product.description && (
           <p style={{ color: '#6B6560', lineHeight: 1.7, marginBottom: '2rem' }}>{product.description}</p>
         )}
-        <CartButton item={cartItem} stockCount={product.stock_count} disabled={product.stock_count === 0} />
+        <CartButton productId={product.id} stockCount={product.stock_count} disabled={product.stock_count === 0} />
         <WishlistButton productId={product.id} />
         <p style={{ marginTop: '1rem', fontSize: '0.75rem', color: '#6B6560', textAlign: 'center' }}>
           Handmade to order · Ships within 7–10 days · Pan-India delivery

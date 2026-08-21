@@ -2,9 +2,10 @@
 
 import Link from 'next/link'
 import Image from 'next/image'
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import type { Product } from '@/types'
 import { StockBadge } from './StockBadge'
+import { useWishlist } from '@/lib/context/WishlistContext'
 
 interface Props {
   product: Product
@@ -12,21 +13,13 @@ interface Props {
 
 export function ProductCard({ product }: Props) {
   const [hovered, setHovered] = useState(false)
-  const [wishlisted, setWishlisted] = useState(false)
-
-  useEffect(() => {
-    const ids: number[] = JSON.parse(localStorage.getItem('pokecraft_wishlist') ?? '[]')
-    setWishlisted(ids.includes(product.id))
-  }, [product.id])
+  const { inWishlist, toggle } = useWishlist()
+  const wishlisted = inWishlist(product.id)
 
   function toggleWishlist(e: React.MouseEvent) {
     e.preventDefault()
     e.stopPropagation()
-    const ids: number[] = JSON.parse(localStorage.getItem('pokecraft_wishlist') ?? '[]')
-    const next = wishlisted ? ids.filter(id => id !== product.id) : [...ids, product.id]
-    localStorage.setItem('pokecraft_wishlist', JSON.stringify(next))
-    setWishlisted(!wishlisted)
-    window.dispatchEvent(new Event('wishlist-updated'))
+    toggle(product.id)
   }
 
   const rupees = (product.price / 100).toLocaleString('en-IN', {

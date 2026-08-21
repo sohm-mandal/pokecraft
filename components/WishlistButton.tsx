@@ -1,25 +1,14 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useWishlist } from '@/lib/context/WishlistContext'
 
 export function WishlistButton({ productId }: { productId: number }) {
-  const [wished, setWished] = useState(false)
-
-  useEffect(() => {
-    const list: number[] = JSON.parse(localStorage.getItem('pokecraft_wishlist') ?? '[]')
-    setWished(list.includes(productId))
-  }, [productId])
-
-  function toggle() {
-    const list: number[] = JSON.parse(localStorage.getItem('pokecraft_wishlist') ?? '[]')
-    const next = list.includes(productId) ? list.filter((id) => id !== productId) : [...list, productId]
-    localStorage.setItem('pokecraft_wishlist', JSON.stringify(next))
-    setWished(!wished)
-  }
+  const { inWishlist, toggle } = useWishlist()
+  const wished = inWishlist(productId)
 
   return (
     <button
-      onClick={toggle}
+      onClick={() => toggle(productId)}
       title={wished ? 'Remove from wishlist' : 'Add to wishlist'}
       style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'none', border: '1.5px solid #E4DBD0', borderRadius: '12px', padding: '12px 20px', cursor: 'pointer', fontSize: '13px', color: wished ? '#C9906A' : '#6B6560', fontFamily: 'inherit', marginTop: '10px', width: '100%', justifyContent: 'center' }}
     >

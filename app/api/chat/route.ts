@@ -44,7 +44,7 @@ export async function POST(req: NextRequest) {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'qwen/qwen3.6-27b',
+        model: 'compound-beta-mini',
         messages,
         max_tokens: 300,
       }),

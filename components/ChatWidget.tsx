@@ -64,23 +64,47 @@ export function ChatWidget() {
 
   return (
     <>
+      <style>{`
+        @keyframes chatPulse {
+          0%, 100% { box-shadow: 0 0 0 0 rgba(201,144,106,0.5), 0 4px 24px rgba(0,0,0,0.22); }
+          50% { box-shadow: 0 0 0 10px rgba(201,144,106,0), 0 4px 24px rgba(0,0,0,0.22); }
+        }
+        .chat-fab {
+          position: fixed; bottom: 24px; right: 24px; zIndex: 1000;
+          width: 60px; height: 60px; border-radius: 50%;
+          background: linear-gradient(135deg, #2A2520 0%, #1A1A18 100%);
+          border: 2px solid rgba(201,144,106,0.4);
+          cursor: pointer;
+          display: flex; align-items: center; justify-content: center;
+          animation: chatPulse 2.8s ease-in-out infinite;
+          transition: transform 0.2s, border-color 0.2s;
+        }
+        .chat-fab:hover {
+          transform: scale(1.1);
+          border-color: rgba(201,144,106,0.8);
+        }
+        .chat-fab-open {
+          animation: none !important;
+          background: linear-gradient(135deg, #C9906A 0%, #b87855 100%) !important;
+          border-color: transparent !important;
+          transform: rotate(0deg);
+        }
+        @keyframes chatFabIn { from { transform: scale(0.7) rotate(-20deg); opacity:0 } to { transform: scale(1) rotate(0deg); opacity:1 } }
+        .chat-fab-icon { animation: chatFabIn 0.22s cubic-bezier(.34,1.56,.64,1) both; }
+      `}</style>
+
       {/* Floating button */}
       <button
         onClick={() => setOpen(o => !o)}
-        style={{
-          position: 'fixed', bottom: '24px', right: '24px', zIndex: 1000,
-          width: '56px', height: '56px', borderRadius: '50%',
-          background: '#1A1A18', border: 'none', cursor: 'pointer',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          boxShadow: '0 4px 20px rgba(0,0,0,0.25)',
-          transition: 'transform 0.2s',
-        }}
+        className={`chat-fab${open ? ' chat-fab-open' : ''}`}
         aria-label="Open chat"
       >
-        {open
-          ? <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#F8F5F0" strokeWidth="2" strokeLinecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
-          : <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#F8F5F0" strokeWidth="1.8" strokeLinecap="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-        }
+        <span className="chat-fab-icon" key={String(open)}>
+          {open
+            ? <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.2" strokeLinecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+            : <span style={{ fontSize: '26px', lineHeight: 1 }}>🧶</span>
+          }
+        </span>
       </button>
 
       {/* Chat window */}

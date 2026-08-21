@@ -17,6 +17,53 @@ async function getProduct(slug: string): Promise<Product | null> {
   return (rows[0] as Product) ?? null
 }
 
+// Pokémon-specific videos. Key is lowercase pokemon_name.
+// Generic fallbacks are used when no specific match is found.
+const POKEMON_VIDEOS: Record<string, { id: string; title: string }[]> = {
+  gengar:    [{ id: 'OfnWOLmJbr8', title: 'Crochet Gengar Custom Order' }],
+  pikachu:   [{ id: 'lfgYHmiPlQ4', title: 'Pikachu Amigurumi Tutorial' }],
+}
+
+const GENERIC_VIDEOS = [
+  { id: 'gj-G0frikmI', title: 'Pokémon Plushies for Anime Con' },
+  { id: 'WvoU3Yt3t2A', title: 'Turning Pokémon into a Plushie' },
+]
+
+function getVideos(pokemonName: string | null): { id: string; title: string }[] {
+  const key = (pokemonName ?? '').toLowerCase().trim()
+  const specific = POKEMON_VIDEOS[key] ?? []
+  // Always show at most 2: specific first, then fill from generics
+  const combined = [...specific, ...GENERIC_VIDEOS.filter(v => !specific.find(s => s.id === v.id))]
+  return combined.slice(0, 2)
+}
+
+function BehindTheScenes({ pokemonName }: { pokemonName: string | null }) {
+  const videos = getVideos(pokemonName)
+  if (videos.length === 0) return null
+  return (
+    <div style={{ gridColumn: '1 / -1', marginTop: '48px' }}>
+      <p style={{ fontSize: '10px', letterSpacing: '0.2em', textTransform: 'uppercase', color: '#C9906A', marginBottom: '8px', fontWeight: 500 }}>Behind the Scenes</p>
+      <h2 style={{ fontFamily: 'var(--font-playfair, Georgia, serif)', fontSize: '1.8rem', color: '#1A1A18', marginBottom: '24px' }}>Watch Us Make It</h2>
+      <div style={{ display: 'grid', gridTemplateColumns: videos.length === 1 ? 'minmax(280px, 520px)' : 'repeat(2, 1fr)', gap: '16px' }}>
+        {videos.map(({ id, title }) => (
+          <div key={id} style={{ borderRadius: '12px', overflow: 'hidden', background: '#1A1A18' }}>
+            <div style={{ position: 'relative', paddingTop: '56.25%' }}>
+              <iframe
+                src={`https://www.youtube.com/embed/${id}?rel=0&modestbranding=1`}
+                title={title}
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+                style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', border: 'none' }}
+              />
+            </div>
+            <p style={{ padding: '10px 14px', fontSize: '12px', color: '#9A918A', margin: 0 }}>{title}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
 export async function generateStaticParams() {
   const rows = await sql`SELECT slug FROM products`
   return (rows as { slug: string }[]).map((r) => ({ slug: r.slug }))
@@ -101,32 +148,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
         </p>
       </div>
       {/* Watch Us Make It */}
-      <div style={{ gridColumn: '1 / -1', marginTop: '48px' }}>
-        <p style={{ fontSize: '10px', letterSpacing: '0.2em', textTransform: 'uppercase', color: '#C9906A', marginBottom: '8px', fontWeight: 500 }}>Behind the Scenes</p>
-        <h2 style={{ fontFamily: 'var(--font-playfair, Georgia, serif)', fontSize: '1.8rem', color: '#1A1A18', marginBottom: '24px' }}>Watch Us Make It</h2>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '16px' }}>
-          {[
-            { id: 'OfnWOLmJbr8', title: 'Crochet Gengar Custom Order' },
-            { id: 'gj-G0frikmI', title: 'Pokémon Plushies for Anime Con' },
-            { id: 'i3LdtHfRsSw', title: 'Fluffy Pokémon Plushies Vlog' },
-            { id: 'WvoU3Yt3t2A', title: 'Turning Pokémon into a Plushie' },
-            { id: 'lfgYHmiPlQ4', title: 'Pikachu Amigurumi Tutorial' },
-          ].map(({ id, title }) => (
-            <div key={id} style={{ borderRadius: '12px', overflow: 'hidden', background: '#1A1A18' }}>
-              <div style={{ position: 'relative', paddingTop: '56.25%' }}>
-                <iframe
-                  src={`https://www.youtube.com/embed/${id}?rel=0&modestbranding=1`}
-                  title={title}
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowFullScreen
-                  style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', border: 'none' }}
-                />
-              </div>
-              <p style={{ padding: '10px 14px', fontSize: '12px', color: '#9A918A', margin: 0 }}>{title}</p>
-            </div>
-          ))}
-        </div>
-      </div>
+      <BehindTheScenes pokemonName={product.pokemon_name} />
     </div>
   )
 }

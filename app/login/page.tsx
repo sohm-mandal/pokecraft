@@ -4,6 +4,7 @@ import { signIn } from 'next-auth/react'
 import { useState, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
+import { StarBackground } from '@/components/StarBackground'
 
 const inputStyle: React.CSSProperties = {
   border: '1.5px solid var(--color-border)',
@@ -364,8 +365,9 @@ function LoginForm() {
         </div>
 
         {/* Right form panel */}
-        <div className="login-form-panel">
-          <div className="login-form-box">
+        <div className="login-form-panel" style={{ position: 'relative' }}>
+          <StarBackground />
+          <div className="login-form-box" style={{ position: 'relative', zIndex: 1 }}>
             <p className="login-eyebrow">Welcome back</p>
             <h1 className="login-heading">Sign in</h1>
 

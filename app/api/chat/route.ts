@@ -57,7 +57,9 @@ export async function POST(req: NextRequest) {
     }
 
     const data = await res.json()
-    const text = data.choices?.[0]?.message?.content ?? 'Sorry, I could not get a response.'
+    const raw: string = data.choices?.[0]?.message?.content ?? ''
+    // Strip <think>...</think> reasoning blocks some models emit
+    const text = raw.replace(/<think>[\s\S]*?<\/think>/g, '').trim() || 'Sorry, I could not get a response.'
     return NextResponse.json({ text })
   } catch (err) {
     console.error('[POST /api/chat]', err)

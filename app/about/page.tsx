@@ -23,8 +23,8 @@ export default function AboutPage() {
         <Image
           src={sohamImg}
           alt="Soham Mandal"
-          width={160}
-          height={200}
+          width={220}
+          height={280}
           style={{ borderRadius: '10px', objectFit: 'cover', objectPosition: 'top', flexShrink: 0 }}
         />
         <div style={{ flex: 1, minWidth: '220px' }}>

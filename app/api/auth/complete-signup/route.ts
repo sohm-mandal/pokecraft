@@ -8,9 +8,9 @@ export async function POST(req: NextRequest) {
 
   const normalised = String(email).toLowerCase().trim()
 
-  // Guard: don't allow if already exists
-  const existing = await sql`SELECT id FROM site_users WHERE username = ${normalised} LIMIT 1`
-  if (existing.length > 0) return NextResponse.json({ error: 'Account already exists.' }, { status: 409 })
+  // Guard: don't allow duplicate username or email
+  const existing = await sql`SELECT id FROM site_users WHERE username = ${normalised} OR email = ${normalised} LIMIT 1`
+  if (existing.length > 0) return NextResponse.json({ error: 'An account with this email already exists.' }, { status: 409 })
 
   await sql`
     INSERT INTO site_users (username, password, name, role, email)

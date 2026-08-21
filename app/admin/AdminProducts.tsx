@@ -120,8 +120,12 @@ export function AdminProducts({ products, onProductChange }: { products: Product
                     <>
                       <input
                         type="number"
+                        min={0}
                         value={stock[p.id] ?? p.stock_count}
-                        onChange={e => setStock(s => ({ ...s, [p.id]: parseInt(e.target.value) }))}
+                        onChange={e => {
+                          const v = Math.max(0, parseInt(e.target.value) || 0)
+                          setStock(s => ({ ...s, [p.id]: v }))
+                        }}
                         style={{ width: '70px', border: '1.5px solid #1A1A18', borderRadius: '8px', padding: '6px 10px', fontSize: '13px', fontFamily: 'inherit', textAlign: 'center' }}
                       />
                       <button onClick={() => saveStock(p.id)} disabled={saving === p.id} style={{ background: '#1A1A18', color: '#F8F5F0', border: 'none', borderRadius: '8px', padding: '7px 14px', fontSize: '12px', cursor: 'pointer', fontFamily: 'inherit' }}>

@@ -85,11 +85,12 @@ function EmailModal({ order, onClose }: { order: Order; onClose: () => void }) {
 function StatusBadge({ status }: { status: OrderStatus }) {
   return (
     <span style={{
-      background: STATUS_COLOR[status] + '22',
+      display: 'inline-flex', alignItems: 'center',
+      background: STATUS_COLOR[status] + '20',
       color: STATUS_COLOR[status],
-      padding: '3px 10px', borderRadius: '100px', fontSize: '10px',
-      fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em',
-      whiteSpace: 'nowrap',
+      padding: '4px 10px', borderRadius: '100px', fontSize: '10px',
+      fontWeight: 700, letterSpacing: '0.06em',
+      whiteSpace: 'nowrap', lineHeight: 1,
     }}>
       {STATUS_LABEL[status]}
     </span>
@@ -126,7 +127,7 @@ function OrderRow({ order, onStatusChange }: { order: Order; onStatusChange: (id
         <div
           className="order-row-desktop"
           onClick={() => setExpanded(v => !v)}
-          style={{ display: 'grid', gridTemplateColumns: '60px 1fr 110px 90px 110px 36px', alignItems: 'center', gap: '12px', padding: '14px 20px', cursor: 'pointer' }}
+          style={{ display: 'grid', gridTemplateColumns: '56px 1fr 100px 80px auto 32px', alignItems: 'center', gap: '16px', padding: '14px 20px', cursor: 'pointer' }}
         >
           <div style={{ fontSize: '13px', fontWeight: 600, color: '#9A918A' }}>#{currentOrder.id}</div>
           <div>
@@ -295,7 +296,7 @@ export function OrdersClient({ orders: initial, onRefresh }: { orders: Order[]; 
       </div>
 
       {/* Column headers — desktop only */}
-      <div className="orders-col-headers" style={{ display: 'grid', gridTemplateColumns: '60px 1fr 110px 90px 110px 36px', gap: '12px', padding: '0 20px 8px', marginBottom: '4px' }}>
+      <div className="orders-col-headers" style={{ display: 'grid', gridTemplateColumns: '56px 1fr 100px 80px auto 32px', gap: '16px', padding: '0 20px 8px', marginBottom: '4px' }}>
         {['Order', 'Customer', 'Date', 'Total', 'Status', ''].map(h => (
           <span key={h} style={{ fontSize: '10px', letterSpacing: '0.12em', textTransform: 'uppercase', color: '#9A918A', fontWeight: 500 }}>{h}</span>
         ))}

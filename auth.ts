@@ -17,9 +17,10 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       },
       async authorize(credentials) {
         if (!credentials?.username || !credentials?.password) return null
+        const identifier = String(credentials.username).toLowerCase().trim()
         const rows = await sql`
           SELECT * FROM site_users
-          WHERE username = ${String(credentials.username)}
+          WHERE (username = ${identifier} OR email = ${identifier})
           AND password = ${String(credentials.password)}
           LIMIT 1
         `

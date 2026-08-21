@@ -376,7 +376,7 @@ function LoginForm() {
                   onChange={e => setUsername(e.target.value)}
                   onFocus={() => setFocusedField('username')}
                   onBlur={() => setFocusedField(null)}
-                  placeholder="Username"
+                  placeholder="Username or Email"
                   required
                   autoComplete="username"
                   style={{ ...inputStyle, borderColor: focusedField === 'username' ? '#C9906A' : '#E4DBD0' }}

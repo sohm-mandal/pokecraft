@@ -1,108 +1,50 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { sql } from '@/lib/db'
+import OpenAI from 'openai'
 
-const BASE_PROMPT = `You are a friendly customer support assistant for PokéCraft, a small shop that sells handmade Pokémon crochet plushies.
+const client = new OpenAI({
+  apiKey: process.env.GROQ_API_KEY,
+  baseURL: 'https://api.groq.com/openai/v1',
+})
 
-Key facts about PokéCraft:
-- All plushies are 100% handmade to order using premium anti-pilling cotton yarn
-- Standard size is 20–25 cm tall
-- Ships worldwide, India delivery takes 7–10 business days, international 10–20 days
-- No returns unless item arrives damaged (contact within 7 days with photos)
-- Custom orders available for any Pokémon not in the shop
-- Payment via Razorpay (cards, UPI, netbanking)
-- Care: hand wash in cold water, air dry only
-- Safe for ages 3+ (safety eyes); under 3, contact for embroidered eyes option
+const SYSTEM_PROMPT = `You are PokéCraft's friendly customer assistant. PokéCraft sells handmade crochet Pokémon plushies, all made to order by Soham Mandal.
 
-Keep answers short, warm, and helpful. If unsure, suggest they contact the seller.`
+Key facts:
+- Every plushie is 100% handmade — no factories
+- Materials: premium anti-pilling cotton yarn, safety eyes, polyester fiberfill
+- Standard size: ~20–25 cm tall, custom sizes available
+- Shipping: 7–10 business days to craft + shipping time, worldwide delivery
+- Returns: only accepted for damaged items (contact within 7 days with photos)
+- Custom orders: any Pokémon on request via the Custom Orders page
+- Payments: Razorpay (UPI, cards, netbanking)
 
-interface Message {
-  role: 'user' | 'model'
-  parts: { text: string }[]
-}
+Be warm, helpful, and concise. If you don't know something specific, suggest they reach out via the Custom Orders or Contact page.`
 
 export async function POST(req: NextRequest) {
-  let body: { messages?: Message[] }
+  const body = await req.json().catch(() => null)
+  if (!body?.messages || !Array.isArray(body.messages)) {
+    return NextResponse.json({ error: 'Invalid request' }, { status: 400 })
+  }
+
+  // Convert from widget format {role:'user'|'model', parts:[{text}]} to OpenAI format
+  const openaiMessages: OpenAI.Chat.ChatCompletionMessageParam[] = body.messages
+    .filter((m: { role: string }) => m.role === 'user' || m.role === 'model')
+    .map((m: { role: string; parts: { text: string }[] }) => ({
+      role: m.role === 'model' ? 'assistant' : 'user',
+      content: m.parts?.[0]?.text ?? '',
+    }))
+    .filter((m: { content: string }) => m.content)
+
   try {
-    body = await req.json()
-  } catch {
-    return NextResponse.json({ error: 'Request body must be valid JSON', code: 'INVALID_JSON' }, { status: 400 })
-  }
+    const completion = await client.chat.completions.create({
+      model: 'llama-3.3-70b-versatile',
+      messages: [{ role: 'system', content: SYSTEM_PROMPT }, ...openaiMessages],
+      max_tokens: 300,
+    })
 
-  const { messages } = body
-  if (!Array.isArray(messages) || messages.length === 0) {
-    return NextResponse.json({ error: 'messages array is required', code: 'MISSING_MESSAGES' }, { status: 400 })
-  }
-
-  const apiKey = process.env.GEMINI_API_KEY
-  if (!apiKey) {
-    return NextResponse.json({ error: 'Chat service is not configured', code: 'GEMINI_NOT_CONFIGURED' }, { status: 503 })
-  }
-
-  // Fetch live product data
-  let productContext = ''
-  try {
-    const products = await sql`SELECT name, price, stock_count FROM products ORDER BY name`
-    const lines = (products as { name: string; price: number; stock_count: number }[]).map(
-      (p) => `- ${p.name}: ₹${Math.round(p.price / 100)} — ${p.stock_count > 0 ? `${p.stock_count} in stock` : 'OUT OF STOCK'}`
-    )
-    productContext = `\n\nCurrent products and stock:\n${lines.join('\n')}`
-  } catch {
-    productContext = ''
-  }
-
-  // Check if any user message mentions an order ID
-  let orderContext = ''
-  const allText = messages.map((m) => m.parts.map((p) => p.text).join(' ')).join(' ')
-  const orderIdMatch = allText.match(/\border\s*#?\s*(\d+)\b/i) ?? allText.match(/\b(\d{1,6})\b/)
-  if (orderIdMatch) {
-    const orderId = orderIdMatch[1]
-    try {
-      const rows = await sql`SELECT id, status, buyer_name, total_amount, items FROM orders WHERE id = ${Number(orderId)} LIMIT 1`
-      const order = rows[0] as { id: number; status: string; buyer_name: string; total_amount: number; items: unknown } | undefined
-      if (order) {
-        orderContext = `\n\nOrder #${order.id} lookup result: Customer: ${order.buyer_name}, Status: ${order.status}, Total: ₹${Math.round(order.total_amount / 100)}`
-      } else {
-        orderContext = `\n\nOrder #${orderId} was not found in the system.`
-      }
-    } catch {
-      orderContext = ''
-    }
-  }
-
-  const systemPrompt = BASE_PROMPT + productContext + orderContext
-
-  let res: Response
-  try {
-    res = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'x-goog-api-key': apiKey },
-        body: JSON.stringify({
-          system_instruction: { parts: [{ text: systemPrompt }] },
-          contents: messages,
-        }),
-      }
-    )
+    const text = completion.choices[0]?.message?.content ?? 'Sorry, I could not get a response.'
+    return NextResponse.json({ text })
   } catch (err) {
-    console.error('[POST /api/chat] Network error reaching Gemini:', err)
-    return NextResponse.json({ error: 'Could not reach chat service', code: 'GEMINI_NETWORK_ERROR' }, { status: 502 })
+    console.error('[POST /api/chat]', err)
+    return NextResponse.json({ error: 'Chat service unavailable', code: 'CHAT_ERROR' }, { status: 502 })
   }
-
-  if (!res.ok) {
-    const errText = await res.text().catch(() => '')
-    console.error('[POST /api/chat] Gemini API error:', res.status, errText)
-    return NextResponse.json(
-      { error: 'Chat service returned an error', code: 'GEMINI_API_ERROR', detail: `HTTP ${res.status}` },
-      { status: 502 }
-    )
-  }
-
-  const data = await res.json()
-  const text = data.candidates?.[0]?.content?.parts?.[0]?.text
-  if (!text) {
-    return NextResponse.json({ error: 'Empty response from chat service', code: 'GEMINI_EMPTY_RESPONSE' }, { status: 502 })
-  }
-
-  return NextResponse.json({ text })
 }

@@ -43,8 +43,8 @@ export function WishlistClient() {
             <div key={p.id} style={{ background: 'white', border: '1px solid #E4DBD0', borderRadius: '12px', padding: '16px 20px', display: 'flex', alignItems: 'center', gap: '16px', flexWrap: 'wrap' }}>
               {/* Image */}
               <Link href={`/shop/${p.slug}`} style={{ flexShrink: 0, textDecoration: 'none' }}>
-                {p.image_url
-                  ? <img src={p.image_url} alt={p.name} style={{ width: '80px', height: '80px', objectFit: 'contain', background: '#F8F5F0', borderRadius: '8px', padding: '6px' }} />
+                {p.images?.[0]
+                  ? <img src={p.images[0]} alt={p.name} style={{ width: '80px', height: '80px', objectFit: 'contain', background: '#F8F5F0', borderRadius: '8px', padding: '6px' }} />
                   : <div style={{ width: '80px', height: '80px', background: '#F8F5F0', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '2rem' }}>🧶</div>
                 }
               </Link>

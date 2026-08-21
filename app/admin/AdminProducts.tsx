@@ -103,8 +103,8 @@ export function AdminProducts({ products }: { products: Product[] }) {
           {list.map(p => (
             <div key={p.id} style={{ background: 'white', border: '1px solid #E4DBD0', borderRadius: '12px', overflow: 'hidden' }}>
               <div className="product-row">
-                {p.image_url && (
-                  <img src={p.image_url} alt={p.name} style={{ width: '52px', height: '52px', objectFit: 'contain', borderRadius: '8px', background: '#F8F5F0', flexShrink: 0 }} />
+                {p.images?.[0] && (
+                  <img src={p.images[0]} alt={p.name} style={{ width: '52px', height: '52px', objectFit: 'contain', borderRadius: '8px', background: '#F8F5F0', flexShrink: 0 }} />
                 )}
                 <div className="product-row-info">
                   <div style={{ fontWeight: 500, fontSize: '14px', marginBottom: '2px' }}>{p.name}</div>

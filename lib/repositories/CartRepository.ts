@@ -9,7 +9,7 @@ export const CartRepository = {
         p.name,
         p.price,
         c.quantity,
-        COALESCE(p.image_url, '') AS image,
+        COALESCE(p.images[1], '') AS image,
         p.stock_count  AS "stockCount"
       FROM cart c
       JOIN products p ON p.id = c.product_id

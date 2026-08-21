@@ -14,12 +14,11 @@ interface WishlistContextValue {
 
 const WishlistContext = createContext<WishlistContextValue | null>(null)
 
-export function WishlistProvider({ email, children }: { email: string | null; children: ReactNode }) {
+export function WishlistProvider({ children }: { children: ReactNode }) {
   const [products, setProducts] = useState<Product[]>([])
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState(true)
 
   const fetchWishlist = useCallback(async () => {
-    if (!email) { setProducts([]); return }
     setLoading(true)
     try {
       const res = await fetch('/api/wishlist')
@@ -27,7 +26,7 @@ export function WishlistProvider({ email, children }: { email: string | null; ch
       else setProducts([])
     } catch { setProducts([]) }
     finally { setLoading(false) }
-  }, [email])
+  }, [])
 
   useEffect(() => { fetchWishlist() }, [fetchWishlist])
 

@@ -1,55 +1,33 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { razorpay } from '@/lib/razorpay'
-import { sql } from '@/lib/db'
-import type { CartItem, ShippingAddress } from '@/types'
-
-interface CreateOrderBody {
-  buyer_name: string
-  buyer_email: string
-  buyer_phone: string
-  shipping_address: ShippingAddress
-  items: CartItem[]
-}
+import { OrderService } from '@/lib/services/OrderService'
+import { CreateOrderSchema, parseBody } from '@/lib/schemas'
 
 export async function POST(req: NextRequest) {
-  const body = (await req.json()) as CreateOrderBody
-  const { buyer_name, buyer_email, buyer_phone, shipping_address, items } = body
-
-  if (!buyer_name || !buyer_email || !buyer_phone || !shipping_address || !items?.length) {
-    return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
+  const parsed = parseBody(CreateOrderSchema, await req.json())
+  if (!parsed.success) {
+    return NextResponse.json({ error: parsed.error }, { status: 400 })
   }
 
-  const total = items.reduce((sum, item) => sum + item.price * item.quantity, 0)
+  const { buyer_name, buyer_email, buyer_phone, shipping_address, items } = parsed.data
+  const total = items.reduce((sum, i) => sum + i.price * i.quantity, 0)
 
-  // Create Razorpay order first
+  // Create Razorpay order first (infrastructure concern stays in the route)
   const rzpOrder = await razorpay.orders.create({
     amount: total,
     currency: 'INR',
     receipt: `receipt_${Date.now()}`,
   })
 
-  const orderItems = items.map((i) => ({
-    id: i.productId,
-    name: i.name,
-    quantity: i.quantity,
-    price: i.price,
-  }))
-
-  // Persist pending order to DB — stock NOT decremented yet
-  const rows = await sql`
-    INSERT INTO orders (
-      razorpay_order_id, buyer_name, buyer_email, buyer_phone,
-      shipping_address, items, total_amount, status
-    ) VALUES (
-      ${rzpOrder.id}, ${buyer_name}, ${buyer_email}, ${buyer_phone},
-      ${JSON.stringify(shipping_address)}, ${JSON.stringify(orderItems)}, ${total}, 'pending'
-    )
-    RETURNING id
-  `
-
-  return NextResponse.json({
-    orderId: (rows[0] as { id: number }).id,
-    razorpayOrderId: rzpOrder.id,
-    amount: total,
+  const orderId = await OrderService.createOnlineOrder({
+    razorpay_order_id: rzpOrder.id,
+    buyer_name,
+    buyer_email,
+    buyer_phone,
+    shipping_address,
+    items,
+    total_amount: total,
   })
+
+  return NextResponse.json({ orderId, razorpayOrderId: rzpOrder.id, amount: total })
 }

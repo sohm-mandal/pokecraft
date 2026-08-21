@@ -1,9 +1,8 @@
 'use client'
 
-import { useEffect, useState, FormEvent } from 'react'
+import { useEffect, FormEvent, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { getCart, clearCart, cartTotal } from '@/lib/cart'
-import type { CartItem } from '@/types'
+import { useCartStore, useCartHydrated } from '@/lib/stores/cartStore'
 
 declare global {
   interface Window {
@@ -22,7 +21,8 @@ const inputCls = 'w-full border border-[#E5DDD4] rounded-xl px-4 py-3 bg-white f
 
 export function CheckoutClient({ sessionEmail, sessionName }: Props) {
   const router = useRouter()
-  const [cart, setCart] = useState<CartItem[]>([])
+  const hydrated = useCartHydrated()
+  const { items, clearCart, getTotal } = useCartStore()
   const [loading, setLoading] = useState(false)
   const [paymentMode, setPaymentMode] = useState<PaymentMode>('online')
   const [form, setForm] = useState({
@@ -37,13 +37,11 @@ export function CheckoutClient({ sessionEmail, sessionName }: Props) {
   })
 
   useEffect(() => {
-    const c = getCart()
-    if (c.length === 0) router.replace('/cart')
-    setCart(c)
-  }, [router])
+    if (hydrated && items.length === 0) router.replace('/cart')
+  }, [hydrated, items.length, router])
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
-    setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }))
+    setForm(prev => ({ ...prev, [e.target.name]: e.target.value }))
   }
 
   const shippingAddress = {
@@ -64,7 +62,7 @@ export function CheckoutClient({ sessionEmail, sessionName }: Props) {
         buyer_email: form.buyer_email,
         buyer_phone: form.buyer_phone,
         shipping_address: shippingAddress,
-        items: cart,
+        items,
       }),
     })
     const data = await res.json()
@@ -81,11 +79,7 @@ export function CheckoutClient({ sessionEmail, sessionName }: Props) {
       name: 'PokéCraft',
       description: 'Handmade Pokémon crochet plushies',
       order_id: data.razorpayOrderId,
-      prefill: {
-        name: form.buyer_name,
-        email: form.buyer_email,
-        contact: form.buyer_phone,
-      },
+      prefill: { name: form.buyer_name, email: form.buyer_email, contact: form.buyer_phone },
       handler: async (response: {
         razorpay_payment_id: string
         razorpay_order_id: string
@@ -123,7 +117,7 @@ export function CheckoutClient({ sessionEmail, sessionName }: Props) {
         buyer_email: form.buyer_email,
         buyer_phone: form.buyer_phone,
         shipping_address: shippingAddress,
-        items: cart,
+        items,
       }),
     })
     const data = await res.json()
@@ -142,7 +136,7 @@ export function CheckoutClient({ sessionEmail, sessionName }: Props) {
     else await handleOnlinePayment()
   }
 
-  const total = cartTotal(cart)
+  const total = getTotal()
   const totalRupees = (total / 100).toLocaleString('en-IN', { style: 'currency', currency: 'INR', minimumFractionDigits: 0 })
 
   return (
@@ -150,7 +144,6 @@ export function CheckoutClient({ sessionEmail, sessionName }: Props) {
       <h1 className="font-serif text-4xl mb-10">Checkout</h1>
       <form onSubmit={handleSubmit} className="space-y-6">
 
-        {/* Contact */}
         <section>
           <h2 className="font-medium text-sm tracking-widest uppercase text-[#6B6560] mb-4">Contact Details</h2>
           <div className="space-y-4">
@@ -164,7 +157,6 @@ export function CheckoutClient({ sessionEmail, sessionName }: Props) {
           </div>
         </section>
 
-        {/* Shipping */}
         <section>
           <h2 className="font-medium text-sm tracking-widest uppercase text-[#6B6560] mb-4">Shipping Address</h2>
           <div className="space-y-4">
@@ -178,7 +170,6 @@ export function CheckoutClient({ sessionEmail, sessionName }: Props) {
           </div>
         </section>
 
-        {/* Payment method selector */}
         <section>
           <h2 className="font-medium text-sm tracking-widest uppercase text-[#6B6560] mb-4">Payment Method</h2>
           <div style={{ display: 'flex', gap: '12px' }}>
@@ -203,7 +194,6 @@ export function CheckoutClient({ sessionEmail, sessionName }: Props) {
           </div>
         </section>
 
-        {/* Total + CTA */}
         <div className="border-t border-[#E5DDD4] pt-6 flex items-center justify-between">
           <div>
             <p className="text-sm text-[#6B6560]">Order Total</p>

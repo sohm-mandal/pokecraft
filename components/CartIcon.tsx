@@ -1,26 +1,10 @@
 'use client'
 
 import Link from 'next/link'
-import { useEffect, useState } from 'react'
-import { getCart } from '@/lib/cart'
+import { useCartStore } from '@/lib/stores/cartStore'
 
 export function CartIcon() {
-  const [count, setCount] = useState(0)
-
-  useEffect(() => {
-    function update() {
-      const cart = getCart()
-      setCount(cart.reduce((sum, i) => sum + i.quantity, 0))
-    }
-    update()
-    window.addEventListener('storage', update)
-    // also poll every second to catch same-tab updates
-    const interval = setInterval(update, 1000)
-    return () => {
-      window.removeEventListener('storage', update)
-      clearInterval(interval)
-    }
-  }, [])
+  const count = useCartStore(state => state.getCount())
 
   return (
     <Link href="/cart" style={{ width: '40px', height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#1A1A18', borderRadius: '50%', position: 'relative', textDecoration: 'none' }}>

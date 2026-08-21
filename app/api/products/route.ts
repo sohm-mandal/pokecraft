@@ -1,12 +1,25 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { sql } from '@/lib/db'
+import { auth } from '@/auth'
+import { ProductService } from '@/lib/services/ProductService'
+import { CreateProductSchema, parseBody } from '@/lib/schemas'
+
+export async function GET() {
+  const products = await ProductService.getAll()
+  return NextResponse.json(products)
+}
 
 export async function POST(req: NextRequest) {
-  const { name, slug, description, price, stock_count, image_url } = await req.json()
-  const rows = await sql`
-    INSERT INTO products (name, slug, description, price, stock_count, image_url)
-    VALUES (${name}, ${slug}, ${description}, ${price}, ${stock_count}, ${image_url})
-    RETURNING *
-  `
-  return NextResponse.json(rows[0])
+  const session = await auth()
+  const role = (session?.user as { role?: string })?.role
+  if (role !== 'admin') {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+  }
+
+  const parsed = parseBody(CreateProductSchema, await req.json())
+  if (!parsed.success) {
+    return NextResponse.json({ error: parsed.error }, { status: 400 })
+  }
+
+  const product = await ProductService.create(parsed.data)
+  return NextResponse.json(product, { status: 201 })
 }

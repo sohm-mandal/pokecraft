@@ -33,9 +33,11 @@ function EmailModal({ order, onClose }: { order: Order; onClose: () => void }) {
   }
 
   return (
-    <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}
-      onClick={e => { if (e.target === e.currentTarget) onClose() }}>
-      <div style={{ background: 'white', borderRadius: '16px', padding: '28px', width: '100%', maxWidth: '480px', boxShadow: '0 20px 60px rgba(0,0,0,0.15)' }}>
+    <div
+      style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px' }}
+      onClick={e => { if (e.target === e.currentTarget) onClose() }}
+    >
+      <div style={{ background: 'white', borderRadius: '16px', padding: '24px', width: '100%', maxWidth: '480px', boxShadow: '0 20px 60px rgba(0,0,0,0.15)' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
           <div>
             <h3 style={{ margin: 0, fontSize: '15px', fontWeight: 600 }}>Email Customer</h3>
@@ -43,11 +45,8 @@ function EmailModal({ order, onClose }: { order: Order; onClose: () => void }) {
           </div>
           <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '18px', color: '#9A918A', padding: '4px' }}>×</button>
         </div>
-
         {sent ? (
-          <div style={{ textAlign: 'center', padding: '24px 0', color: '#2D9E6B', fontWeight: 500 }}>
-            ✓ Email sent successfully
-          </div>
+          <div style={{ textAlign: 'center', padding: '24px 0', color: '#2D9E6B', fontWeight: 500 }}>✓ Email sent successfully</div>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
             <div>
@@ -62,15 +61,13 @@ function EmailModal({ order, onClose }: { order: Order; onClose: () => void }) {
               <label style={{ fontSize: '11px', letterSpacing: '0.1em', textTransform: 'uppercase', color: '#6B6560', display: 'block', marginBottom: '4px' }}>Message</label>
               <textarea
                 value={message} onChange={e => setMessage(e.target.value)}
-                rows={6}
+                rows={5}
                 placeholder="Type your message to the customer..."
                 style={{ width: '100%', border: '1px solid #E4DBD0', borderRadius: '8px', padding: '10px 12px', fontSize: '13px', fontFamily: 'inherit', resize: 'vertical', boxSizing: 'border-box' }}
               />
             </div>
             <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
-              <button onClick={onClose} style={{ border: '1px solid #E4DBD0', background: 'none', padding: '10px 20px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'inherit', fontSize: '13px' }}>
-                Cancel
-              </button>
+              <button onClick={onClose} style={{ border: '1px solid #E4DBD0', background: 'none', padding: '10px 20px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'inherit', fontSize: '13px' }}>Cancel</button>
               <button
                 onClick={send} disabled={sending || !subject.trim() || !message.trim()}
                 style={{ background: sending ? '#9A918A' : '#1A1A18', color: 'white', border: 'none', padding: '10px 24px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'inherit', fontSize: '13px', fontWeight: 500 }}
@@ -82,6 +79,20 @@ function EmailModal({ order, onClose }: { order: Order; onClose: () => void }) {
         )}
       </div>
     </div>
+  )
+}
+
+function StatusBadge({ status }: { status: OrderStatus }) {
+  return (
+    <span style={{
+      background: STATUS_COLOR[status] + '22',
+      color: STATUS_COLOR[status],
+      padding: '3px 10px', borderRadius: '100px', fontSize: '10px',
+      fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em',
+      whiteSpace: 'nowrap',
+    }}>
+      {STATUS_LABEL[status]}
+    </span>
   )
 }
 
@@ -110,10 +121,12 @@ function OrderRow({ order, onStatusChange }: { order: Order; onStatusChange: (id
   return (
     <>
       <div style={{ background: 'white', border: `1.5px solid ${expanded ? '#1A1A18' : '#E4DBD0'}`, borderRadius: '12px', overflow: 'hidden', transition: 'border-color 0.15s' }}>
-        {/* Summary row */}
+
+        {/* Summary row — desktop */}
         <div
+          className="order-row-desktop"
           onClick={() => setExpanded(v => !v)}
-          style={{ display: 'grid', gridTemplateColumns: '60px 1fr 120px 100px 120px 36px', alignItems: 'center', gap: '12px', padding: '14px 20px', cursor: 'pointer' }}
+          style={{ display: 'grid', gridTemplateColumns: '60px 1fr 110px 90px 110px 36px', alignItems: 'center', gap: '12px', padding: '14px 20px', cursor: 'pointer' }}
         >
           <div style={{ fontSize: '13px', fontWeight: 600, color: '#9A918A' }}>#{currentOrder.id}</div>
           <div>
@@ -123,37 +136,56 @@ function OrderRow({ order, onStatusChange }: { order: Order; onStatusChange: (id
           <div style={{ fontSize: '12px', color: '#6B6560' }}>
             {new Date(currentOrder.created_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
           </div>
-          <div style={{ fontWeight: 600, fontSize: '13px' }}>
-            ₹{(currentOrder.total_amount / 100).toLocaleString('en-IN')}
-          </div>
-          <div>
-            <span style={{
-              background: STATUS_COLOR[currentOrder.status] + '22',
-              color: STATUS_COLOR[currentOrder.status],
-              padding: '3px 10px', borderRadius: '100px', fontSize: '10px',
-              fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em',
-            }}>
-              {STATUS_LABEL[currentOrder.status]}
-            </span>
-          </div>
+          <div style={{ fontWeight: 600, fontSize: '13px' }}>₹{(currentOrder.total_amount / 100).toLocaleString('en-IN')}</div>
+          <StatusBadge status={currentOrder.status} />
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A918A" strokeWidth="2" strokeLinecap="round"
-            style={{ transform: expanded ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s', flexShrink: 0 }}>
+            style={{ transform: expanded ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s', justifySelf: 'center' }}>
             <polyline points="6 9 12 15 18 9"/>
           </svg>
         </div>
 
+        {/* Summary row — mobile */}
+        <div
+          className="order-row-mobile"
+          onClick={() => setExpanded(v => !v)}
+          style={{ display: 'none', padding: '14px 16px', cursor: 'pointer' }}
+        >
+          <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '8px' }}>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+                <span style={{ fontSize: '12px', fontWeight: 600, color: '#9A918A' }}>#{currentOrder.id}</span>
+                <span style={{ fontWeight: 600, fontSize: '13px', color: '#1A1A18' }}>{currentOrder.buyer_name}</span>
+              </div>
+              <p style={{ margin: '0 0 6px', fontSize: '11px', color: '#9A918A', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{currentOrder.buyer_email}</p>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+                <StatusBadge status={currentOrder.status} />
+                <span style={{ fontSize: '12px', color: '#6B6560' }}>
+                  {new Date(currentOrder.created_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}
+                </span>
+              </div>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '6px', flexShrink: 0 }}>
+              <span style={{ fontWeight: 700, fontSize: '14px' }}>₹{(currentOrder.total_amount / 100).toLocaleString('en-IN')}</span>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9A918A" strokeWidth="2" strokeLinecap="round"
+                style={{ transform: expanded ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }}>
+                <polyline points="6 9 12 15 18 9"/>
+              </svg>
+            </div>
+          </div>
+        </div>
+
         {/* Expanded detail */}
         {expanded && (
-          <div style={{ borderTop: '1px solid #F0EBE1', padding: '20px 20px 24px' }}>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '24px', marginBottom: '20px' }}>
+          <div style={{ borderTop: '1px solid #F0EBE1', padding: '20px 16px 24px' }}>
+            <div className="order-expanded-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '24px', marginBottom: '20px' }}>
 
               {/* Items */}
               <div>
                 <p style={{ margin: '0 0 10px', fontSize: '10px', letterSpacing: '0.12em', textTransform: 'uppercase', color: '#9A918A' }}>Items Ordered</p>
                 {items.map(item => (
                   <div key={item.id} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', padding: '5px 0', borderBottom: '1px solid #F5F0EB' }}>
-                    <span>{item.name} <span style={{ color: '#9A918A' }}>×{item.quantity}</span></span>
-                    <span style={{ fontWeight: 500 }}>₹{((item.price * item.quantity) / 100).toLocaleString('en-IN')}</span>
+                    <span style={{ flex: 1, minWidth: 0, marginRight: '8px' }}>{item.name} <span style={{ color: '#9A918A' }}>×{item.quantity}</span></span>
+                    <span style={{ fontWeight: 500, flexShrink: 0 }}>₹{((item.price * item.quantity) / 100).toLocaleString('en-IN')}</span>
                   </div>
                 ))}
                 <div style={{ display: 'flex', justifyContent: 'space-between', paddingTop: '8px', fontWeight: 600, fontSize: '13px' }}>
@@ -170,12 +202,8 @@ function OrderRow({ order, onStatusChange }: { order: Order; onStatusChange: (id
                   {addr.line1}{addr.line2 ? `, ${addr.line2}` : ''}<br/>
                   {addr.city}, {addr.state} – {addr.pincode}
                 </p>
-                <p style={{ margin: '8px 0 0', fontSize: '12px', color: '#9A918A' }}>
-                  📞 {currentOrder.buyer_phone}
-                </p>
-                <p style={{ margin: '4px 0 0', fontSize: '12px', color: '#9A918A' }}>
-                  {isCod ? '🏠 Cash on Delivery' : '💳 Paid Online'}
-                </p>
+                <p style={{ margin: '8px 0 0', fontSize: '12px', color: '#9A918A' }}>📞 {currentOrder.buyer_phone}</p>
+                <p style={{ margin: '4px 0 0', fontSize: '12px', color: '#9A918A' }}>{isCod ? '🏠 Cash on Delivery' : '💳 Paid Online'}</p>
               </div>
 
               {/* Actions */}
@@ -190,22 +218,15 @@ function OrderRow({ order, onStatusChange }: { order: Order; onStatusChange: (id
                       onChange={e => updateStatus(e.target.value as OrderStatus)}
                       style={{ width: '100%', border: '1.5px solid #E4DBD0', borderRadius: '8px', padding: '8px 12px', fontSize: '12px', fontFamily: 'inherit', background: 'white', cursor: 'pointer' }}
                     >
-                      {ALL_STATUSES.map(s => (
-                        <option key={s} value={s}>{STATUS_LABEL[s]}</option>
-                      ))}
+                      {ALL_STATUSES.map(s => <option key={s} value={s}>{STATUS_LABEL[s]}</option>)}
                     </select>
                     {updating && <p style={{ margin: '4px 0 0', fontSize: '11px', color: '#9A918A' }}>Updating…</p>}
                   </div>
                   <button
-                    onClick={(e) => { e.stopPropagation(); setEmailModal(true) }}
-                    style={{
-                      display: 'flex', alignItems: 'center', gap: '6px', justifyContent: 'center',
-                      border: '1.5px solid #E4DBD0', background: 'white', borderRadius: '8px',
-                      padding: '9px 14px', fontSize: '12px', cursor: 'pointer', fontFamily: 'inherit',
-                      fontWeight: 500, transition: 'border-color 0.12s, background 0.12s',
-                    }}
-                    onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.borderColor = '#1A1A18'; (e.currentTarget as HTMLButtonElement).style.background = '#F8F5F0' }}
-                    onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.borderColor = '#E4DBD0'; (e.currentTarget as HTMLButtonElement).style.background = 'white' }}
+                    onClick={e => { e.stopPropagation(); setEmailModal(true) }}
+                    style={{ display: 'flex', alignItems: 'center', gap: '6px', justifyContent: 'center', border: '1.5px solid #E4DBD0', background: 'white', borderRadius: '8px', padding: '9px 14px', fontSize: '12px', cursor: 'pointer', fontFamily: 'inherit', fontWeight: 500, transition: 'border-color 0.12s, background 0.12s' }}
+                    onMouseEnter={e => { e.currentTarget.style.borderColor = '#1A1A18'; e.currentTarget.style.background = '#F8F5F0' }}
+                    onMouseLeave={e => { e.currentTarget.style.borderColor = '#E4DBD0'; e.currentTarget.style.background = 'white' }}
                   >
                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
                       <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/>
@@ -235,7 +256,16 @@ export function OrdersClient({ orders: initial }: { orders: Order[] }) {
   const filtered = filter === 'all' ? orders : orders.filter(o => o.status === filter)
 
   return (
-    <div>
+    <>
+      <style>{`
+        @media (max-width: 680px) {
+          .order-row-desktop { display: none !important; }
+          .order-row-mobile { display: block !important; }
+          .orders-col-headers { display: none !important; }
+          .order-expanded-grid { grid-template-columns: 1fr !important; gap: 20px !important; }
+        }
+      `}</style>
+
       {/* Filter tabs */}
       <div style={{ display: 'flex', gap: '6px', marginBottom: '20px', flexWrap: 'wrap' }}>
         {(['all', ...ALL_STATUSES] as const).map(s => {
@@ -260,8 +290,8 @@ export function OrdersClient({ orders: initial }: { orders: Order[] }) {
         })}
       </div>
 
-      {/* Column headers */}
-      <div style={{ display: 'grid', gridTemplateColumns: '60px 1fr 120px 100px 120px 36px', gap: '12px', padding: '0 20px 8px', marginBottom: '4px' }}>
+      {/* Column headers — desktop only */}
+      <div className="orders-col-headers" style={{ display: 'grid', gridTemplateColumns: '60px 1fr 110px 90px 110px 36px', gap: '12px', padding: '0 20px 8px', marginBottom: '4px' }}>
         {['Order', 'Customer', 'Date', 'Total', 'Status', ''].map(h => (
           <span key={h} style={{ fontSize: '10px', letterSpacing: '0.12em', textTransform: 'uppercase', color: '#9A918A', fontWeight: 500 }}>{h}</span>
         ))}
@@ -271,7 +301,7 @@ export function OrdersClient({ orders: initial }: { orders: Order[] }) {
       <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
         {filtered.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '60px 20px', color: '#9A918A', background: 'white', border: '1px solid #E4DBD0', borderRadius: '12px' }}>
-            No orders with status "{filter}"
+            No orders with status &quot;{filter}&quot;
           </div>
         ) : (
           filtered.map(order => (
@@ -279,6 +309,6 @@ export function OrdersClient({ orders: initial }: { orders: Order[] }) {
           ))
         )}
       </div>
-    </div>
+    </>
   )
 }

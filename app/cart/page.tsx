@@ -1,8 +1,8 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import Link from 'next/link'
-import { getCart, removeFromCart, updateQuantity, cartTotal } from '@/lib/cart'
+import { useCartStore, useCartHydrated } from '@/lib/stores/cartStore'
 import type { CartItem } from '@/types'
 
 function fmt(paise: number) {
@@ -46,7 +46,6 @@ function CartRow({ item, onRemove, onQty }: { item: CartItem; onRemove: () => vo
       opacity: removing ? 0 : 1, transform: removing ? 'translateX(-12px)' : 'none',
       transition: 'opacity 0.2s, transform 0.2s',
     }}>
-      {/* Image */}
       <div style={{ width: '88px', height: '88px', borderRadius: '12px', background: '#F5F0EB', flexShrink: 0, overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         {item.image
           ? <img src={item.image} alt={item.name} style={{ width: '100%', height: '100%', objectFit: 'contain', padding: '6px' }} />
@@ -54,25 +53,21 @@ function CartRow({ item, onRemove, onQty }: { item: CartItem; onRemove: () => vo
         }
       </div>
 
-      {/* Info */}
       <div style={{ flex: 1, minWidth: 0 }}>
         <p style={{ margin: '0 0 4px', fontWeight: 600, fontSize: '15px', color: '#1A1A18' }}>{item.name}</p>
         <p style={{ margin: 0, fontSize: '13px', color: '#9A918A' }}>{fmt(item.price)} each</p>
       </div>
 
-      {/* Qty stepper */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
         <QtyButton onClick={() => onQty(item.quantity - 1)}>−</QtyButton>
         <span style={{ fontSize: '14px', fontWeight: 600, minWidth: '20px', textAlign: 'center' }}>{item.quantity}</span>
         <QtyButton onClick={() => onQty(item.quantity + 1)}>+</QtyButton>
       </div>
 
-      {/* Line total */}
       <p style={{ margin: 0, fontWeight: 700, fontSize: '15px', minWidth: '72px', textAlign: 'right', color: '#1A1A18' }}>
         {fmt(item.price * item.quantity)}
       </p>
 
-      {/* Remove */}
       <button
         onClick={remove}
         title="Remove"
@@ -87,24 +82,16 @@ function CartRow({ item, onRemove, onQty }: { item: CartItem; onRemove: () => vo
 }
 
 export default function CartPage() {
-  const [cart, setCart] = useState<CartItem[]>([])
-  const [mounted, setMounted] = useState(false)
+  const hydrated = useCartHydrated()
+  const { items, removeItem, updateQuantity, getTotal } = useCartStore()
 
-  useEffect(() => { setCart(getCart()); setMounted(true) }, [])
+  if (!hydrated) return null
 
-  function handleRemove(productId: number) { setCart(removeFromCart(productId)) }
-  function handleQty(productId: number, qty: number) {
-    if (qty < 1) return
-    setCart(updateQuantity(productId, qty))
-  }
+  const total = getTotal()
+  const freeShipping = total >= 50000
+  const shippingCost = freeShipping ? 0 : 8000
 
-  const total = cartTotal(cart)
-  const freeShipping = total >= 50000 // free shipping above ₹500
-  const shippingCost = freeShipping ? 0 : 8000 // ₹80
-
-  if (!mounted) return null
-
-  if (cart.length === 0) {
+  if (items.length === 0) {
     return (
       <div style={{ maxWidth: '480px', margin: '0 auto', padding: '80px 24px', textAlign: 'center' }}>
         <div style={{ fontSize: '64px', marginBottom: '20px', lineHeight: 1 }}>🧺</div>
@@ -123,8 +110,6 @@ export default function CartPage() {
 
   return (
     <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '48px 24px' }}>
-
-      {/* Header */}
       <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: '36px', flexWrap: 'wrap', gap: '8px' }}>
         <h1 style={{ fontFamily: 'var(--font-playfair, Georgia, serif)', fontSize: '2.2rem', color: '#1A1A18', margin: 0 }}>
           Your Cart
@@ -135,10 +120,7 @@ export default function CartPage() {
       </div>
 
       <div className="cart-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 340px', gap: '48px', alignItems: 'start' }}>
-
-        {/* Items */}
         <div>
-          {/* Column labels */}
           <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0 0 12px', borderBottom: '2px solid #1A1A18', marginBottom: '4px' }}>
             <span style={{ fontSize: '10px', letterSpacing: '0.16em', textTransform: 'uppercase', color: '#9A918A', fontWeight: 500 }}>Product</span>
             <div style={{ display: 'flex', gap: '52px' }}>
@@ -147,24 +129,23 @@ export default function CartPage() {
             </div>
           </div>
 
-          {cart.map(item => (
+          {items.map(item => (
             <CartRow
               key={item.productId}
               item={item}
-              onRemove={() => handleRemove(item.productId)}
-              onQty={qty => handleQty(item.productId, qty)}
+              onRemove={() => removeItem(item.productId)}
+              onQty={qty => qty < 1 ? removeItem(item.productId) : updateQuantity(item.productId, qty)}
             />
           ))}
         </div>
 
-        {/* Order summary */}
         <div style={{ position: 'sticky', top: '88px' }}>
-          <div style={{ background: 'white', border: '1px solid #E4DBD0', borderRadius: '16px', padding: '28px', }}>
+          <div style={{ background: 'white', border: '1px solid #E4DBD0', borderRadius: '16px', padding: '28px' }}>
             <h2 style={{ fontFamily: 'var(--font-playfair, Georgia, serif)', fontSize: '1.2rem', color: '#1A1A18', margin: '0 0 20px' }}>Order Summary</h2>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '20px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px' }}>
-                <span style={{ color: '#6B6560' }}>Subtotal ({cart.reduce((s, i) => s + i.quantity, 0)} items)</span>
+                <span style={{ color: '#6B6560' }}>Subtotal ({items.reduce((s, i) => s + i.quantity, 0)} items)</span>
                 <span style={{ fontWeight: 500 }}>{fmt(total)}</span>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px' }}>
@@ -205,7 +186,6 @@ export default function CartPage() {
               Proceed to Checkout
             </Link>
 
-            {/* Trust badges */}
             <div style={{ marginTop: '20px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
               {[['🔒', 'Secure checkout'], ['🚚', 'India-wide delivery'], ['🧶', '100% handmade']].map(([icon, text]) => (
                 <div key={text} style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '11px', color: '#9A918A' }}>
@@ -218,7 +198,6 @@ export default function CartPage() {
         </div>
       </div>
 
-      {/* Mobile: single column */}
       <style>{`
         @media (max-width: 768px) {
           .cart-grid { grid-template-columns: 1fr !important; }

@@ -24,13 +24,13 @@ export const CartRepository = {
       INSERT INTO cart (user_email, product_id, quantity)
       VALUES (${email}, ${productId}, ${quantity})
       ON CONFLICT (user_email, product_id)
-      DO UPDATE SET quantity = ${quantity}, updated_at = NOW()
+      DO UPDATE SET quantity = ${quantity}
     `
   },
 
   async updateQuantity(email: string, productId: number, quantity: number): Promise<void> {
     await sql`
-      UPDATE cart SET quantity = ${quantity}, updated_at = NOW()
+      UPDATE cart SET quantity = ${quantity}
       WHERE user_email = ${email} AND product_id = ${productId}
     `
   },

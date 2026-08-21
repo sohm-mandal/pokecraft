@@ -4,8 +4,8 @@ import Link from 'next/link'
 import { useCart } from '@/lib/context/CartContext'
 
 export function CartIcon() {
-  const { getCount } = useCart()
-  const count = getCount()
+  const { items } = useCart()
+  const count = items.length
 
   return (
     <Link href="/cart" style={{ width: '40px', height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#1A1A18', borderRadius: '50%', position: 'relative', textDecoration: 'none' }}>

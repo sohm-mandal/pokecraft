@@ -34,6 +34,13 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
     return products.some(p => p.id === productId)
   }, [products])
 
+  const silentRefetch = useCallback(async () => {
+    try {
+      const res = await fetch('/api/wishlist')
+      if (res.ok) setProducts(await res.json())
+    } catch { /* non-fatal */ }
+  }, [])
+
   const toggle = useCallback(async (productId: number) => {
     if (inWishlist(productId)) {
       setProducts(prev => prev.filter(p => p.id !== productId))
@@ -44,9 +51,9 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ productId }),
       })
-      await fetchWishlist()
+      await silentRefetch()
     }
-  }, [inWishlist, fetchWishlist])
+  }, [inWishlist, silentRefetch])
 
   const removeItem = useCallback(async (productId: number) => {
     setProducts(prev => prev.filter(p => p.id !== productId))

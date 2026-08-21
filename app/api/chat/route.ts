@@ -1,10 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server'
-import OpenAI from 'openai'
-
-const client = new OpenAI({
-  apiKey: process.env.GROQ_API_KEY,
-  baseURL: 'https://api.groq.com/openai/v1',
-})
 
 const SYSTEM_PROMPT = `You are PokéCraft's friendly customer assistant. PokéCraft sells handmade crochet Pokémon plushies, all made to order by Soham Mandal.
 
@@ -25,23 +19,45 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Invalid request' }, { status: 400 })
   }
 
-  // Convert from widget format {role:'user'|'model', parts:[{text}]} to OpenAI format
-  const openaiMessages: OpenAI.Chat.ChatCompletionMessageParam[] = body.messages
-    .filter((m: { role: string }) => m.role === 'user' || m.role === 'model')
-    .map((m: { role: string; parts: { text: string }[] }) => ({
-      role: m.role === 'model' ? 'assistant' : 'user',
-      content: m.parts?.[0]?.text ?? '',
-    }))
-    .filter((m: { content: string }) => m.content)
+  const apiKey = process.env.GROQ_API_KEY
+  if (!apiKey) {
+    return NextResponse.json({ error: 'Chat service not configured', code: 'NO_API_KEY' }, { status: 503 })
+  }
+
+  // Convert widget format {role:'user'|'model', parts:[{text}]} → Groq format
+  const messages = [
+    { role: 'system', content: SYSTEM_PROMPT },
+    ...body.messages
+      .filter((m: { role: string }) => m.role === 'user' || m.role === 'model')
+      .map((m: { role: string; parts: { text: string }[] }) => ({
+        role: m.role === 'model' ? 'assistant' : 'user',
+        content: m.parts?.[0]?.text ?? '',
+      }))
+      .filter((m: { content: string }) => m.content),
+  ]
 
   try {
-    const completion = await client.chat.completions.create({
-      model: 'llama-3.3-70b-versatile',
-      messages: [{ role: 'system', content: SYSTEM_PROMPT }, ...openaiMessages],
-      max_tokens: 300,
+    const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'llama-3.3-70b-versatile',
+        messages,
+        max_tokens: 300,
+      }),
     })
 
-    const text = completion.choices[0]?.message?.content ?? 'Sorry, I could not get a response.'
+    if (!res.ok) {
+      const err = await res.text()
+      console.error('[POST /api/chat] Groq error:', res.status, err)
+      return NextResponse.json({ error: 'Chat service error', code: 'CHAT_ERROR', detail: err, status: res.status }, { status: 502 })
+    }
+
+    const data = await res.json()
+    const text = data.choices?.[0]?.message?.content ?? 'Sorry, I could not get a response.'
     return NextResponse.json({ text })
   } catch (err) {
     console.error('[POST /api/chat]', err)

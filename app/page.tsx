@@ -1,7 +1,9 @@
 import Link from 'next/link'
+import Image from 'next/image'
 import { sql } from '@/lib/db'
 import type { Product } from '@/types'
 import { ProductCard } from '@/components/ProductCard'
+import sohamImg from '@/assets/soham.png'
 
 export const dynamic = 'force-dynamic'
 
@@ -68,6 +70,27 @@ export default async function HomePage() {
           </div>
         ))}
       </div>
+
+      {/* ── MAKER STRIP ── */}
+      <section style={{ background: '#F8F5F0', padding: '56px 20px', borderBottom: '1px solid #E4DBD0' }}>
+        <div style={{ maxWidth: '720px', margin: '0 auto', display: 'flex', alignItems: 'center', gap: '36px', flexWrap: 'wrap' }}>
+          <div style={{ position: 'relative', width: '110px', height: '140px', borderRadius: '12px', overflow: 'hidden', flexShrink: 0, border: '2px solid #E4DBD0' }}>
+            <Image src={sohamImg} alt="Soham" fill style={{ objectFit: 'cover' }} />
+          </div>
+          <div style={{ flex: 1, minWidth: '220px' }}>
+            <p style={{ fontSize: '10px', letterSpacing: '0.2em', textTransform: 'uppercase', color: '#C9906A', marginBottom: '12px', fontWeight: 500 }}>The Maker</p>
+            <h2 style={{ fontFamily: 'var(--font-playfair, Georgia, serif)', fontSize: '1.7rem', color: '#1A1A18', marginBottom: '14px', lineHeight: 1.25 }}>
+              Hi, I&apos;m Soham — I make every one of these by hand.
+            </h2>
+            <p style={{ fontSize: '14px', lineHeight: 1.75, color: '#6B6560', fontWeight: 300, margin: '0 0 20px' }}>
+              Each plushie is crocheted by me, start to finish. No factories, no shortcuts — just premium yarn and a lot of love for Pokémon.
+            </p>
+            <Link href="/about" style={{ fontSize: '12px', letterSpacing: '0.12em', textTransform: 'uppercase', color: '#1A1A18', textDecoration: 'none', fontWeight: 500, borderBottom: '1.5px solid #1A1A18', paddingBottom: '2px' }}>
+              Our story →
+            </Link>
+          </div>
+        </div>
+      </section>
 
       {/* ── BEST SELLERS ── */}
       {products.length > 0 && (

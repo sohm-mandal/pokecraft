@@ -20,7 +20,7 @@ export default function AboutPage() {
       {/* About Me */}
       <p style={{ fontSize: '10px', letterSpacing: '0.2em', textTransform: 'uppercase', color: '#C9906A', marginBottom: '16px', fontWeight: 500 }}>About Me</p>
       <div style={{ display: 'flex', alignItems: 'center', gap: '24px', marginBottom: '24px' }}>
-        <div style={{ position: 'relative', width: '80px', height: '80px', borderRadius: '50%', overflow: 'hidden', flexShrink: 0, border: '2px solid #E4DBD0' }}>
+        <div style={{ position: 'relative', width: '96px', height: '120px', borderRadius: '12px', overflow: 'hidden', flexShrink: 0, border: '2px solid #E4DBD0' }}>
           <Image src={sohamImg} alt="Soham" fill style={{ objectFit: 'cover' }} />
         </div>
         <h2 style={{ fontFamily: 'var(--font-playfair, Georgia, serif)', fontSize: '2rem', color: '#1A1A18', lineHeight: 1.2, margin: 0 }}>

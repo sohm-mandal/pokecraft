@@ -1,5 +1,6 @@
 'use client'
 
+import Link from 'next/link'
 import { useCartStore } from '@/lib/stores/cartStore'
 import type { CartItem } from '@/types'
 
@@ -10,9 +11,8 @@ interface Props {
 }
 
 export function CartButton({ item, stockCount, disabled = false }: Props) {
-  const { items, addItem, removeItem, updateQuantity } = useCartStore()
-  const found = items.find(i => i.productId === item.productId)
-  const qty = found?.quantity ?? 0
+  const { items, addItem } = useCartStore()
+  const inCart = items.some(i => i.productId === item.productId)
 
   if (disabled) {
     return (
@@ -22,55 +22,30 @@ export function CartButton({ item, stockCount, disabled = false }: Props) {
     )
   }
 
-  if (qty > 0) {
-    const atMax = qty >= stockCount
+  if (inCart) {
     return (
       <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0', borderRadius: '12px', border: '1.5px solid #1A1A18', overflow: 'hidden' }}>
-          <button
-            onClick={() => updateQuantity(item.productId, qty - 1)}
-            style={{ width: '48px', height: '48px', background: 'white', border: 'none', cursor: 'pointer', fontSize: '20px', color: '#1A1A18', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'background 0.12s' }}
-            onMouseEnter={e => (e.currentTarget.style.background = '#F5F0EB')}
-            onMouseLeave={e => (e.currentTarget.style.background = 'white')}
-          >
-            −
-          </button>
-          <div style={{ flex: 1, textAlign: 'center', fontSize: '15px', fontWeight: 700, color: '#1A1A18', borderLeft: '1px solid #E4DBD0', borderRight: '1px solid #E4DBD0' }}>
-            {qty}
-          </div>
-          <button
-            onClick={() => { if (qty < stockCount) updateQuantity(item.productId, qty + 1) }}
-            disabled={atMax}
-            title={atMax ? `Only ${stockCount} in stock` : undefined}
-            style={{ width: '48px', height: '48px', background: atMax ? '#F5F0EB' : 'white', border: 'none', cursor: atMax ? 'not-allowed' : 'pointer', fontSize: '20px', color: atMax ? '#C0B8B0' : '#1A1A18', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'background 0.12s' }}
-            onMouseEnter={e => { if (!atMax) (e.currentTarget.style.background = '#F5F0EB') }}
-            onMouseLeave={e => { if (!atMax) (e.currentTarget.style.background = 'white') }}
-          >
-            +
-          </button>
+        <div style={{ width: '100%', padding: '14px', borderRadius: '12px', background: '#EAF6EF', border: '1.5px solid #2D9E6B', textAlign: 'center', fontSize: '13px', fontWeight: 600, color: '#2D9E6B', letterSpacing: '0.04em', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+            <polyline points="20 6 9 17 4 12"/>
+          </svg>
+          Added to Cart
         </div>
-
-        {atMax && (
-          <p style={{ margin: 0, fontSize: '11px', color: '#E5A800', textAlign: 'center', letterSpacing: '0.02em' }}>
-            Max available quantity ({stockCount}) reached
-          </p>
-        )}
-
-        <button
-          onClick={() => removeItem(item.productId)}
-          style={{ background: 'none', border: '1px solid #E4DBD0', borderRadius: '10px', padding: '10px', fontSize: '12px', color: '#9A918A', cursor: 'pointer', fontFamily: 'inherit', transition: 'color 0.12s, border-color 0.12s' }}
-          onMouseEnter={e => { e.currentTarget.style.color = '#E05252'; e.currentTarget.style.borderColor = '#FCC' }}
-          onMouseLeave={e => { e.currentTarget.style.color = '#9A918A'; e.currentTarget.style.borderColor = '#E4DBD0' }}
+        <Link
+          href="/cart"
+          style={{ display: 'block', width: '100%', padding: '12px', borderRadius: '12px', border: '1px solid #E4DBD0', textAlign: 'center', fontSize: '13px', fontWeight: 500, color: '#1A1A18', textDecoration: 'none', letterSpacing: '0.02em', transition: 'border-color 0.12s, background 0.12s', boxSizing: 'border-box' }}
+          onMouseEnter={e => { e.currentTarget.style.borderColor = '#1A1A18'; e.currentTarget.style.background = '#F5F0EB' }}
+          onMouseLeave={e => { e.currentTarget.style.borderColor = '#E4DBD0'; e.currentTarget.style.background = 'transparent' }}
         >
-          Remove from cart
-        </button>
+          View Cart →
+        </Link>
       </div>
     )
   }
 
   return (
     <button
-      onClick={() => addItem({ ...item, quantity: 1 }, stockCount)}
+      onClick={() => addItem({ ...item, quantity: 1, stockCount }, stockCount)}
       style={{ width: '100%', padding: '14px', borderRadius: '12px', background: '#1A1A18', color: '#F8F5F0', border: 'none', fontSize: '13px', fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase', cursor: 'pointer', fontFamily: 'inherit', transition: 'background 0.15s' }}
       onMouseEnter={e => (e.currentTarget.style.background = '#C9906A')}
       onMouseLeave={e => (e.currentTarget.style.background = '#1A1A18')}

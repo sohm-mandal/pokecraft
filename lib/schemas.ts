@@ -14,6 +14,7 @@ export const CartItemSchema = z.object({
   price: z.number().int().positive(),
   quantity: z.number().int().positive(),
   image: z.string(),
+  stockCount: z.number().int().positive().optional(),
 })
 
 export const CreateOrderSchema = z.object({

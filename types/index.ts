@@ -25,6 +25,7 @@ export interface CartItem {
   price: number       // paise
   quantity: number
   image: string
+  stockCount?: number
 }
 
 export interface ShippingAddress {

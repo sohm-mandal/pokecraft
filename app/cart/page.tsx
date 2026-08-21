@@ -33,6 +33,7 @@ function QtyButton({ onClick, children }: { onClick: () => void; children: React
 
 function CartRow({ item, onRemove, onQty }: { item: CartItem; onRemove: () => void; onQty: (q: number) => void }) {
   const [removing, setRemoving] = useState(false)
+  const atMax = item.stockCount != null && item.quantity >= item.stockCount
 
   function remove() {
     setRemoving(true)
@@ -44,7 +45,7 @@ function CartRow({ item, onRemove, onQty }: { item: CartItem; onRemove: () => vo
       display: 'flex', gap: '20px', alignItems: 'center',
       padding: '20px 0', borderBottom: '1px solid #F0EBE1',
       opacity: removing ? 0 : 1, transform: removing ? 'translateX(-12px)' : 'none',
-      transition: 'opacity 0.2s, transform 0.2s',
+      transition: 'opacity 0.2s, transform 0.2s', flexWrap: 'wrap',
     }}>
       <div style={{ width: '88px', height: '88px', borderRadius: '12px', background: '#F5F0EB', flexShrink: 0, overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         {item.image
@@ -56,12 +57,17 @@ function CartRow({ item, onRemove, onQty }: { item: CartItem; onRemove: () => vo
       <div style={{ flex: 1, minWidth: 0 }}>
         <p style={{ margin: '0 0 4px', fontWeight: 600, fontSize: '15px', color: '#1A1A18' }}>{item.name}</p>
         <p style={{ margin: 0, fontSize: '13px', color: '#9A918A' }}>{fmt(item.price)} each</p>
+        {atMax && (
+          <p style={{ margin: '4px 0 0', fontSize: '11px', color: '#E5A800', fontWeight: 500 }}>
+            Max quantity reached ({item.stockCount} available)
+          </p>
+        )}
       </div>
 
       <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
         <QtyButton onClick={() => onQty(item.quantity - 1)}>−</QtyButton>
         <span style={{ fontSize: '14px', fontWeight: 600, minWidth: '20px', textAlign: 'center' }}>{item.quantity}</span>
-        <QtyButton onClick={() => onQty(item.quantity + 1)}>+</QtyButton>
+        <QtyButton onClick={() => { if (!atMax) onQty(item.quantity + 1) }}>+</QtyButton>
       </div>
 
       <p style={{ margin: 0, fontWeight: 700, fontSize: '15px', minWidth: '72px', textAlign: 'right', color: '#1A1A18' }}>

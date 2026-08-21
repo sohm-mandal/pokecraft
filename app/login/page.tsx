@@ -322,10 +322,9 @@ function LoginForm() {
             </div>
           </div>
         </div>
-      </div>
 
         {/* Developer strip */}
-        <div style={{ width: '100%', borderTop: '1px solid #E4DBD0', marginTop: '48px', paddingTop: '28px', display: 'flex', alignItems: 'center', gap: '16px', maxWidth: '420px' }}>
+        <div style={{ width: '100%', borderTop: '1px solid #E4DBD0', marginTop: '32px', paddingTop: '24px', display: 'flex', alignItems: 'center', gap: '16px', maxWidth: '420px' }}>
           <Image src={sohamImg} alt="Soham Mandal" width={44} height={56} style={{ borderRadius: '6px', objectFit: 'cover', objectPosition: 'top', flexShrink: 0 }} />
           <div>
             <p style={{ fontSize: '12px', fontWeight: 600, color: '#1A1A18', margin: '0 0 2px' }}>Soham Mandal</p>

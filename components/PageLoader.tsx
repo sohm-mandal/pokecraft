@@ -24,6 +24,8 @@ function PageLoaderInner() {
       try {
         const url = new URL(href, window.location.href)
         if (url.origin !== window.location.origin) return
+        // Same page — no navigation will happen, so the loader would never complete
+        if (url.pathname === window.location.pathname && url.search === window.location.search) return
       } catch { return }
       startLoader()
     }

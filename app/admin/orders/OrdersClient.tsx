@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import type { Order, OrderItem, OrderStatus, ShippingAddress } from '@/types'
 
 const STATUS_COLOR: Record<OrderStatus, string> = {
@@ -245,12 +245,16 @@ function OrderRow({ order, onStatusChange }: { order: Order; onStatusChange: (id
   )
 }
 
-export function OrdersClient({ orders: initial }: { orders: Order[] }) {
+export function OrdersClient({ orders: initial, onRefresh }: { orders: Order[]; onRefresh?: () => void }) {
   const [orders, setOrders] = useState(initial)
   const [filter, setFilter] = useState<OrderStatus | 'all'>('all')
 
+  // Sync when parent refreshes
+  useEffect(() => { setOrders(initial) }, [initial])
+
   function onStatusChange(id: number, status: OrderStatus) {
     setOrders(prev => prev.map(o => o.id === id ? { ...o, status } : o))
+    onRefresh?.()
   }
 
   const filtered = filter === 'all' ? orders : orders.filter(o => o.status === filter)

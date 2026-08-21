@@ -1,10 +1,13 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import type { Product } from '@/types'
 
-export function AdminProducts({ products }: { products: Product[] }) {
+export function AdminProducts({ products, onProductChange }: { products: Product[]; onProductChange?: () => void }) {
   const [list, setList] = useState(products)
+
+  // Sync when parent re-fetches
+  useEffect(() => { setList(products) }, [products])
   const [editing, setEditing] = useState<number | null>(null)
   const [stock, setStock] = useState<Record<number, number>>({})
   const [saving, setSaving] = useState<number | null>(null)
@@ -22,6 +25,7 @@ export function AdminProducts({ products }: { products: Product[] }) {
     setList(prev => prev.map(p => p.id === id ? { ...p, stock_count: stock[id] } : p))
     setEditing(null)
     setSaving(null)
+    onProductChange?.()
   }
 
   async function addProduct() {
@@ -40,6 +44,7 @@ export function AdminProducts({ products }: { products: Product[] }) {
     setNewProduct({ name: '', pokemon_name: '', slug: '', price: '', stock_count: '', image_url: '', description: '' })
     setShowAdd(false)
     setAdding(false)
+    onProductChange?.()
   }
 
   return (

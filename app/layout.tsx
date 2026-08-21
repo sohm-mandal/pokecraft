@@ -79,7 +79,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
 
               {/* Desktop Nav */}
               <nav className="desktop-nav" style={{ display: 'flex', gap: '28px', alignItems: 'center' }}>
-                {[['Shop', '/shop'], ['Collections', '/collections'], ['About', '/about'], ['Custom Orders', '/custom-orders'], ['FAQ', '/faq']].map(([label, href]) => (
+                {[['Shop', '/shop'], ['Collections', '/collections'], ['Custom Orders', '/custom-orders'], ['FAQ', '/faq'], ['About', '/about']].map(([label, href]) => (
                   <Link key={href} href={href} style={{ fontSize: '13px', fontWeight: 400, letterSpacing: '0.03em', color: '#3A3530', textDecoration: 'none' }}>
                     {label}
                   </Link>
@@ -99,7 +99,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             {/* MOBILE NAV */}
             <nav className="mobile-nav" style={{ background: '#F8F5F0', borderBottom: '1px solid #EAE3D9', overflowX: 'auto', whiteSpace: 'nowrap', padding: '0 16px' }}>
               <div style={{ display: 'inline-flex', gap: '0' }}>
-                {[['Shop', '/shop'], ['Collections', '/collections'], ['About', '/about'], ['Custom Orders', '/custom-orders'], ['FAQ', '/faq']].map(([label, href]) => (
+                {[['Shop', '/shop'], ['Collections', '/collections'], ['Custom Orders', '/custom-orders'], ['FAQ', '/faq'], ['About', '/about']].map(([label, href]) => (
                   <Link key={href} href={href} style={{ display: 'inline-block', padding: '12px 16px', fontSize: '12px', fontWeight: 500, letterSpacing: '0.05em', color: '#3A3530', textDecoration: 'none', textTransform: 'uppercase' }}>
                     {label}
                   </Link>

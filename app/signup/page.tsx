@@ -4,6 +4,8 @@ import { useState, FormEvent, Suspense, useEffect, useRef } from 'react'
 import { signIn } from 'next-auth/react'
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
+import Image from 'next/image'
+import sohamImg from '@/assets/soham.png'
 
 type Step = 'email' | 'otp' | 'setup'
 
@@ -332,6 +334,19 @@ function SignupForm() {
             </button>
           </form>
         )}
+
+      {/* Developer strip */}
+      <div style={{ width: '100%', borderTop: '1px solid var(--color-border)', marginTop: '40px', paddingTop: '24px', display: 'flex', alignItems: 'center', gap: '16px' }}>
+        <Image src={sohamImg} alt="Soham Mandal" width={44} height={56} style={{ borderRadius: '6px', objectFit: 'cover', objectPosition: 'top', flexShrink: 0 }} />
+        <div>
+          <p style={{ fontSize: '12px', fontWeight: 600, color: 'var(--color-ink)', margin: '0 0 2px' }}>Soham Mandal</p>
+          <p style={{ fontSize: '11px', color: 'var(--color-muted)', margin: '0 0 6px' }}>Full-Stack Developer</p>
+          <div style={{ display: 'flex', gap: '12px' }}>
+            <a href="mailto:sohammandal.work24@gmail.com" style={{ fontSize: '11px', color: 'var(--color-accent)', textDecoration: 'none' }}>Email</a>
+            <a href="https://www.linkedin.com/in/soham-mandal-3aa090246" target="_blank" rel="noopener noreferrer" style={{ fontSize: '11px', color: 'var(--color-accent)', textDecoration: 'none' }}>LinkedIn</a>
+          </div>
+        </div>
+      </div>
       </div>
     </div>
   )

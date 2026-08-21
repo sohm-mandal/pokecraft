@@ -12,6 +12,29 @@ const faqs = [
 export default function FAQPage() {
   return (
     <div style={{ maxWidth: '720px', margin: '0 auto', padding: '80px 1.5rem' }}>
+
+      {/* Test card — top of page */}
+      <div style={{ background: '#F0EAE0', border: '1.5px solid #E4DBD0', borderRadius: '16px', padding: '24px 28px', marginBottom: '56px' }}>
+        <p style={{ fontSize: '10px', letterSpacing: '0.2em', textTransform: 'uppercase', color: '#C9906A', marginBottom: '12px', fontWeight: 500 }}>For Testing</p>
+        <p style={{ fontSize: '14px', lineHeight: 1.6, color: '#6B6560', fontWeight: 300, margin: '0 0 20px' }}>
+          Use the card details below to make a test payment — no real money is charged.
+        </p>
+        <div style={{ display: 'flex', gap: '32px', flexWrap: 'wrap', fontFamily: 'monospace', fontSize: '14px' }}>
+          <div>
+            <p style={{ fontSize: '10px', letterSpacing: '0.14em', textTransform: 'uppercase', color: '#9A918A', margin: '0 0 4px', fontFamily: 'inherit' }}>Card Number</p>
+            <p style={{ color: '#1A1A18', margin: 0, fontWeight: 600, letterSpacing: '0.08em' }}>4100 2800 0000 1007</p>
+          </div>
+          <div>
+            <p style={{ fontSize: '10px', letterSpacing: '0.14em', textTransform: 'uppercase', color: '#9A918A', margin: '0 0 4px', fontFamily: 'inherit' }}>CVV</p>
+            <p style={{ color: '#1A1A18', margin: 0, fontWeight: 600 }}>123</p>
+          </div>
+          <div>
+            <p style={{ fontSize: '10px', letterSpacing: '0.14em', textTransform: 'uppercase', color: '#9A918A', margin: '0 0 4px', fontFamily: 'inherit' }}>Expiry</p>
+            <p style={{ color: '#1A1A18', margin: 0, fontWeight: 600 }}>12/26</p>
+          </div>
+        </div>
+      </div>
+
       <p style={{ fontSize: '10px', letterSpacing: '0.2em', textTransform: 'uppercase', color: '#C9906A', marginBottom: '16px', fontWeight: 500 }}>Help</p>
       <h1 style={{ fontFamily: 'var(--font-playfair, Georgia, serif)', fontSize: '3rem', color: '#1A1A18', marginBottom: '48px', lineHeight: 1.2 }}>
         Frequently Asked Questions

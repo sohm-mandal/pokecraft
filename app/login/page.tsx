@@ -4,6 +4,8 @@ import { signIn } from 'next-auth/react'
 import { useState, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
+import Image from 'next/image'
+import sohamImg from '@/assets/soham.png'
 
 const inputStyle: React.CSSProperties = {
   border: '1.5px solid var(--color-border)',
@@ -317,6 +319,20 @@ function LoginForm() {
               <span className="perk-item"><span className="perk-dot"/>Wishlist & orders</span>
               <span className="perk-item"><span className="perk-dot"/>Order tracking</span>
               <span className="perk-item"><span className="perk-dot"/>Early drops</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+        {/* Developer strip */}
+        <div style={{ width: '100%', borderTop: '1px solid #E4DBD0', marginTop: '48px', paddingTop: '28px', display: 'flex', alignItems: 'center', gap: '16px', maxWidth: '420px' }}>
+          <Image src={sohamImg} alt="Soham Mandal" width={44} height={56} style={{ borderRadius: '6px', objectFit: 'cover', objectPosition: 'top', flexShrink: 0 }} />
+          <div>
+            <p style={{ fontSize: '12px', fontWeight: 600, color: '#1A1A18', margin: '0 0 2px' }}>Soham Mandal</p>
+            <p style={{ fontSize: '11px', color: '#9A918A', margin: '0 0 6px' }}>Full-Stack Developer</p>
+            <div style={{ display: 'flex', gap: '12px' }}>
+              <a href="mailto:sohammandal.work24@gmail.com" style={{ fontSize: '11px', color: '#C9906A', textDecoration: 'none' }}>Email</a>
+              <a href="https://www.linkedin.com/in/soham-mandal-3aa090246" target="_blank" rel="noopener noreferrer" style={{ fontSize: '11px', color: '#C9906A', textDecoration: 'none' }}>LinkedIn</a>
             </div>
           </div>
         </div>

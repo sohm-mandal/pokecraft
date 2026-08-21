@@ -4,7 +4,6 @@ import { useState, FormEvent, Suspense, useEffect, useRef } from 'react'
 import { signIn } from 'next-auth/react'
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
-import { StarBackground } from '@/components/StarBackground'
 
 type Step = 'email' | 'otp' | 'setup'
 
@@ -197,9 +196,8 @@ function SignupForm() {
   const h = headings[step]
 
   return (
-    <div style={{ minHeight: '80vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '40px 20px', position: 'relative', overflow: 'hidden' }}>
-      <StarBackground />
-      <div style={{ width: '100%', maxWidth: '400px', position: 'relative', zIndex: 1 }}>
+    <div style={{ minHeight: '80vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '40px 20px' }}>
+      <div style={{ width: '100%', maxWidth: '400px' }}>
         <div style={{ textAlign: 'center', marginBottom: '36px' }}>
           <p style={{ fontSize: '10px', letterSpacing: '0.2em', textTransform: 'uppercase', color: 'var(--color-accent)', marginBottom: '12px' }}>{h.eyebrow}</p>
           <h1 style={{ fontFamily: 'var(--font-serif)', fontSize: '2rem', color: 'var(--color-ink)', margin: 0 }}>{h.title}</h1>

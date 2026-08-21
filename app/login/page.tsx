@@ -4,7 +4,6 @@ import { signIn } from 'next-auth/react'
 import { useState, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
-import { StarBackground } from '@/components/StarBackground'
 
 const inputStyle: React.CSSProperties = {
   border: '1.5px solid var(--color-border)',
@@ -236,8 +235,6 @@ function LoginForm() {
       `}</style>
 
       <div className="login-page-wrap">
-        <StarBackground />
-
         <div className="login-form-box">
           <p className="login-eyebrow">Welcome back</p>
           <h1 className="login-heading">Sign in</h1>

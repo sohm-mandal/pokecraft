@@ -71,27 +71,6 @@ export default async function HomePage() {
         ))}
       </div>
 
-      {/* ── MAKER STRIP ── */}
-      <section style={{ background: '#F8F5F0', padding: '56px 20px', borderBottom: '1px solid #E4DBD0' }}>
-        <div style={{ maxWidth: '720px', margin: '0 auto', display: 'flex', alignItems: 'center', gap: '36px', flexWrap: 'wrap' }}>
-          <div style={{ position: 'relative', width: '110px', height: '140px', borderRadius: '12px', overflow: 'hidden', flexShrink: 0, border: '2px solid #E4DBD0' }}>
-            <Image src={sohamImg} alt="Soham" fill style={{ objectFit: 'cover' }} />
-          </div>
-          <div style={{ flex: 1, minWidth: '220px' }}>
-            <p style={{ fontSize: '10px', letterSpacing: '0.2em', textTransform: 'uppercase', color: '#C9906A', marginBottom: '12px', fontWeight: 500 }}>The Maker</p>
-            <h2 style={{ fontFamily: 'var(--font-playfair, Georgia, serif)', fontSize: '1.7rem', color: '#1A1A18', marginBottom: '14px', lineHeight: 1.25 }}>
-              Hi, I&apos;m Soham — I make every one of these by hand.
-            </h2>
-            <p style={{ fontSize: '14px', lineHeight: 1.75, color: '#6B6560', fontWeight: 300, margin: '0 0 20px' }}>
-              Each plushie is crocheted by me, start to finish. No factories, no shortcuts — just premium yarn and a lot of love for Pokémon.
-            </p>
-            <Link href="/about" style={{ fontSize: '12px', letterSpacing: '0.12em', textTransform: 'uppercase', color: '#1A1A18', textDecoration: 'none', fontWeight: 500, borderBottom: '1.5px solid #1A1A18', paddingBottom: '2px' }}>
-              Our story →
-            </Link>
-          </div>
-        </div>
-      </section>
-
       {/* ── BEST SELLERS ── */}
       {products.length > 0 && (
         <section style={{ padding: '56px 20px 72px', background: '#F8F5F0' }}>
@@ -121,19 +100,70 @@ export default async function HomePage() {
         </section>
       )}
 
+      {/* ── MAKER SECTION ── */}
+      <section style={{ background: '#1A1A18', overflow: 'hidden' }}>
+        <div className="maker-inner">
+          {/* Image — fills left column, auto height */}
+          <div className="maker-img-wrap">
+            <Image
+              src={sohamImg}
+              alt="Soham — the maker"
+              sizes="(max-width: 768px) 100vw, 50vw"
+              style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'top center', display: 'block' }}
+              width={sohamImg.width}
+              height={sohamImg.height}
+            />
+          </div>
+          {/* Text */}
+          <div style={{ padding: '64px 48px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+            <p style={{ fontSize: '10px', letterSpacing: '0.22em', textTransform: 'uppercase', color: '#C9906A', marginBottom: '20px', fontWeight: 500 }}>The Maker</p>
+            <h2 style={{ fontFamily: 'var(--font-playfair, Georgia, serif)', fontSize: '2.4rem', color: '#F8F5F0', marginBottom: '20px', lineHeight: 1.2 }}>
+              Hi, I&apos;m Soham — I make every one of these by hand.
+            </h2>
+            <p style={{ fontSize: '15px', lineHeight: 1.8, color: '#9A918A', fontWeight: 300, marginBottom: '36px' }}>
+              Each plushie is crocheted by me, start to finish. No factories, no shortcuts — just premium yarn and a whole lot of love for Pokémon.
+            </p>
+            <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', marginBottom: '32px' }}>
+              <a href="mailto:sohammandal.work24@gmail.com" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', fontSize: '13px', color: '#C9906A', textDecoration: 'none', fontWeight: 500 }}>
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
+                  <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+                  <polyline points="22,6 12,13 2,6"/>
+                </svg>
+                sohammandal.work24@gmail.com
+              </a>
+              <a href="https://www.linkedin.com/in/soham-mandal-3aa090246" target="_blank" rel="noopener noreferrer" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', fontSize: '13px', color: '#C9906A', textDecoration: 'none', fontWeight: 500 }}>
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/>
+                  <rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/>
+                </svg>
+                LinkedIn
+              </a>
+            </div>
+            <Link href="/about" style={{ display: 'inline-flex', alignItems: 'center', gap: '10px', background: '#F8F5F0', color: '#1A1A18', padding: '13px 28px', fontSize: '11px', letterSpacing: '0.16em', textTransform: 'uppercase', fontWeight: 500, textDecoration: 'none', alignSelf: 'flex-start' }}>
+              Our story →
+            </Link>
+          </div>
+        </div>
+      </section>
+
       <style>{`
         .hero-section { height: 580px; }
         .hero-left { width: 44%; }
         .hero-right { flex: 1; min-height: 300px; }
         .products-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
+        .maker-inner { display: grid; grid-template-columns: 1fr 1fr; min-height: 520px; }
+        .maker-img-wrap { overflow: hidden; }
         @media (max-width: 768px) {
           .hero-section { height: auto; flex-direction: column; }
           .hero-left { width: 100%; padding: 48px 24px !important; }
           .hero-right { width: 100%; min-height: 280px; }
           .products-grid { grid-template-columns: repeat(2, 1fr); gap: 14px; }
+          .maker-inner { grid-template-columns: 1fr; }
+          .maker-img-wrap { max-height: 420px; }
         }
         @media (max-width: 480px) {
           .products-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+          .maker-img-wrap { max-height: 320px; }
         }
       `}</style>
     </>

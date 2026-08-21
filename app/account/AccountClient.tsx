@@ -113,10 +113,15 @@ export function AccountClient({ name, image, sessionEmail }: Props) {
 
   useEffect(() => {
     async function loadWishlist() {
-      const ids: number[] = JSON.parse(localStorage.getItem('pokecraft_wishlist') ?? '[]')
-      if (!ids.length) { setWishlist([]); return }
-      const res = await fetch(`/api/wishlist?ids=${ids.join(',')}`)
-      if (res.ok) setWishlist(await res.json())
+      try {
+        const ids: number[] = JSON.parse(localStorage.getItem('pokecraft_wishlist') ?? '[]')
+        if (!ids.length) { setWishlist([]); return }
+        const res = await fetch(`/api/wishlist?ids=${ids.join(',')}`)
+        if (res.ok) setWishlist(await res.json())
+        else setWishlist([])
+      } catch {
+        setWishlist([])
+      }
     }
     loadWishlist()
   }, [])
@@ -128,10 +133,15 @@ export function AccountClient({ name, image, sessionEmail }: Props) {
   async function fetchOrders(emailToSearch: string) {
     if (!emailToSearch) return
     setLoadingOrders(true)
-    const res = await fetch(`/api/orders/by-email?email=${encodeURIComponent(emailToSearch)}`)
-    if (res.ok) setOrders(await res.json())
-    else setOrders([])
-    setLoadingOrders(false)
+    try {
+      const res = await fetch(`/api/orders/by-email?email=${encodeURIComponent(emailToSearch)}`)
+      if (res.ok) setOrders(await res.json())
+      else setOrders([])
+    } catch {
+      setOrders([])
+    } finally {
+      setLoadingOrders(false)
+    }
   }
 
   function removeFromWishlist(productId: number) {

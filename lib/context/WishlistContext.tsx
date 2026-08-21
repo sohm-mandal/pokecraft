@@ -19,31 +19,16 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true)
 
   const fetchWishlist = useCallback(async () => {
-    console.log('[WishlistContext] fetchWishlist called')
     setLoading(true)
     try {
-      console.log('[WishlistContext] calling GET /api/wishlist')
       const res = await fetch('/api/wishlist')
-      console.log('[WishlistContext] response status:', res.status)
-      if (res.ok) {
-        const data = await res.json()
-        console.log('[WishlistContext] got products:', data.length)
-        setProducts(data)
-      } else {
-        console.error('[WishlistContext] non-ok response:', res.status)
-        setProducts([])
-      }
-    } catch (err) {
-      console.error('[WishlistContext] fetch error:', err)
-      setProducts([])
-    }
+      if (res.ok) setProducts(await res.json())
+      else setProducts([])
+    } catch { setProducts([]) }
     finally { setLoading(false) }
   }, [])
 
-  useEffect(() => {
-    console.log('[WishlistContext] mounted — triggering fetchWishlist')
-    fetchWishlist()
-  }, [fetchWishlist])
+  useEffect(() => { fetchWishlist() }, [fetchWishlist])
 
   const inWishlist = useCallback((productId: number) => {
     return products.some(p => p.id === productId)

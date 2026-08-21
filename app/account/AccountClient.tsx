@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { useWishlist } from '@/lib/context/WishlistContext'
 import type { Order, OrderItem, ShippingAddress } from '@/types'
 
 interface Props {
@@ -110,7 +109,6 @@ export function AccountClient({ name, image, sessionEmail }: Props) {
   const [orders, setOrders] = useState<Order[] | null>(null)
   const [loadingOrders, setLoadingOrders] = useState(false)
   const [expandedId, setExpandedId] = useState<number | null>(null)
-  const { products: wishlist, removeItem: removeFromWishlist } = useWishlist()
 
   useEffect(() => {
     if (sessionEmail) fetchOrders(sessionEmail)
@@ -212,39 +210,18 @@ export function AccountClient({ name, image, sessionEmail }: Props) {
         )}
       </section>
 
-      {/* Wishlist */}
+      {/* Wishlist shortcut */}
       <section>
-        <h2 style={{ fontFamily: 'var(--font-playfair, Georgia, serif)', fontSize: '1.4rem', color: '#1A1A18', marginBottom: '20px' }}>Wishlist</h2>
-        {wishlist.length === 0 ? (
-          <div style={{ background: 'white', border: '1px solid #E4DBD0', borderRadius: '12px', padding: '40px', textAlign: 'center', color: '#9A918A' }}>
-            <p style={{ margin: '0 0 16px' }}>Your wishlist is empty.</p>
-            <Link href="/shop" style={{ color: '#C9906A', textDecoration: 'none', fontSize: '13px', fontWeight: 500 }}>Browse the shop →</Link>
-          </div>
-        ) : (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: '16px' }}>
-            {wishlist.map((p) => (
-              <div key={p.id} style={{ background: 'white', border: '1px solid #E4DBD0', borderRadius: '12px', overflow: 'hidden', position: 'relative' }}>
-                <button
-                  onClick={() => removeFromWishlist(p.id)}
-                  title="Remove"
-                  style={{ position: 'absolute', top: '8px', right: '8px', background: 'white', border: '1px solid #E4DBD0', borderRadius: '50%', width: '24px', height: '24px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', color: '#9A918A' }}
-                >
-                  ×
-                </button>
-                <Link href={`/shop/${p.slug}`} style={{ textDecoration: 'none', color: 'inherit' }}>
-                  {p.image_url
-                    ? <img src={p.image_url} alt={p.name} style={{ width: '100%', height: '120px', objectFit: 'contain', background: '#F8F5F0', padding: '8px' }} />
-                    : <div style={{ width: '100%', height: '120px', background: '#F8F5F0', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '3rem' }}>🧶</div>
-                  }
-                  <div style={{ padding: '10px 12px' }}>
-                    <div style={{ fontSize: '13px', fontWeight: 500 }}>{p.name}</div>
-                    <div style={{ fontSize: '12px', color: '#C9906A' }}>₹{(p.price / 100).toLocaleString('en-IN')}</div>
-                  </div>
-                </Link>
-              </div>
-            ))}
-          </div>
-        )}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+          <h2 style={{ fontFamily: 'var(--font-playfair, Georgia, serif)', fontSize: '1.4rem', color: '#1A1A18', margin: 0 }}>Wishlist</h2>
+          <Link href="/wishlist" style={{ fontSize: '13px', color: '#C9906A', textDecoration: 'none', fontWeight: 500 }}>View all →</Link>
+        </div>
+        <div style={{ background: 'white', border: '1px solid #E4DBD0', borderRadius: '12px', padding: '20px 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '16px' }}>
+          <p style={{ margin: 0, fontSize: '14px', color: '#6B6560' }}>View and manage your saved items.</p>
+          <Link href="/wishlist" style={{ flexShrink: 0, background: '#1A1A18', color: '#F8F5F0', padding: '10px 20px', borderRadius: '100px', textDecoration: 'none', fontSize: '12px', fontWeight: 500, letterSpacing: '0.04em' }}>
+            My Wishlist
+          </Link>
+        </div>
       </section>
     </div>
   )

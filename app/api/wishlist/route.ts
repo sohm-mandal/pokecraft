@@ -14,12 +14,9 @@ export async function GET() {
   if (!email) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   try {
-    console.log('[wishlist] fetching for', email)
     const products = await WishlistService.getWishlist(email)
-    console.log('[wishlist] got', products.length, 'products')
     return NextResponse.json(products)
-  } catch (err) {
-    console.error('[wishlist] error', err)
+  } catch {
     return NextResponse.json([], { status: 200 })
   }
 }

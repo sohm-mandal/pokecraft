@@ -10,14 +10,11 @@ export async function GET(req: NextRequest) {
   if (!email) return NextResponse.json({ error: 'Missing email' }, { status: 400 })
 
   try {
-    console.log('[orders/by-email] fetching for', email)
     const rows = await sql`
       SELECT * FROM orders WHERE buyer_email = ${email} ORDER BY created_at DESC
     `
-    console.log('[orders/by-email] got', rows.length, 'rows')
     return NextResponse.json(rows)
-  } catch (err) {
-    console.error('[orders/by-email] error', err)
+  } catch {
     return NextResponse.json([], { status: 200 })
   }
 }

@@ -101,6 +101,8 @@ function OrderRow({ order, onStatusChange }: { order: Order; onStatusChange: (id
   const [expanded, setExpanded] = useState(false)
   const [updating, setUpdating] = useState(false)
   const [emailModal, setEmailModal] = useState(false)
+  const [sendingStatusEmail, setSendingStatusEmail] = useState(false)
+  const [statusEmailResult, setStatusEmailResult] = useState<'sent' | 'error' | null>(null)
   const [currentOrder, setCurrentOrder] = useState(order)
 
   const items = currentOrder.items as OrderItem[]
@@ -117,6 +119,25 @@ function OrderRow({ order, onStatusChange }: { order: Order; onStatusChange: (id
     setCurrentOrder(o => ({ ...o, status }))
     onStatusChange(currentOrder.id, status)
     setUpdating(false)
+    setStatusEmailResult(null)
+  }
+
+  async function sendStatusEmail() {
+    setSendingStatusEmail(true)
+    setStatusEmailResult(null)
+    try {
+      const res = await fetch('/api/admin/send-status-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ orderId: currentOrder.id }),
+      })
+      setStatusEmailResult(res.ok ? 'sent' : 'error')
+    } catch {
+      setStatusEmailResult('error')
+    } finally {
+      setSendingStatusEmail(false)
+      setTimeout(() => setStatusEmailResult(null), 4000)
+    }
   }
 
   return (
@@ -223,6 +244,51 @@ function OrderRow({ order, onStatusChange }: { order: Order; onStatusChange: (id
                     </select>
                     {updating && <p style={{ margin: '4px 0 0', fontSize: '11px', color: '#9A918A' }}>Updating…</p>}
                   </div>
+
+                  {/* Send status notification email */}
+                  <div>
+                    <label style={{ fontSize: '11px', color: '#6B6560', display: 'block', marginBottom: '4px' }}>Status Notification</label>
+                    <button
+                      onClick={e => { e.stopPropagation(); sendStatusEmail() }}
+                      disabled={sendingStatusEmail}
+                      style={{
+                        display: 'flex', alignItems: 'center', gap: '6px', justifyContent: 'center',
+                        width: '100%',
+                        border: `1.5px solid ${statusEmailResult === 'sent' ? '#2D9E6B' : statusEmailResult === 'error' ? '#E05252' : '#C9906A'}`,
+                        background: statusEmailResult === 'sent' ? '#F0FFF7' : statusEmailResult === 'error' ? '#FFF0F0' : 'white',
+                        color: statusEmailResult === 'sent' ? '#2D9E6B' : statusEmailResult === 'error' ? '#E05252' : '#C9906A',
+                        borderRadius: '8px', padding: '9px 14px', fontSize: '12px',
+                        cursor: sendingStatusEmail ? 'not-allowed' : 'pointer',
+                        fontFamily: 'inherit', fontWeight: 600,
+                        transition: 'all 0.15s',
+                        opacity: sendingStatusEmail ? 0.7 : 1,
+                      }}
+                    >
+                      {statusEmailResult === 'sent' ? (
+                        <>
+                          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+                          Email Sent
+                        </>
+                      ) : statusEmailResult === 'error' ? (
+                        <>
+                          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                          Failed — Retry
+                        </>
+                      ) : (
+                        <>
+                          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                            <path d="M22 2L11 13"/><path d="M22 2L15 22l-4-9-9-4 20-7z"/>
+                          </svg>
+                          {sendingStatusEmail ? 'Sending…' : `Send "${STATUS_LABEL[currentOrder.status]}" Email`}
+                        </>
+                      )}
+                    </button>
+                    <p style={{ margin: '4px 0 0', fontSize: '10px', color: '#B0A8A0', lineHeight: 1.4 }}>
+                      Notifies {currentOrder.buyer_email} of current status
+                    </p>
+                  </div>
+
+                  {/* Custom message */}
                   <button
                     onClick={e => { e.stopPropagation(); setEmailModal(true) }}
                     style={{ display: 'flex', alignItems: 'center', gap: '6px', justifyContent: 'center', border: '1.5px solid #E4DBD0', background: 'white', borderRadius: '8px', padding: '9px 14px', fontSize: '12px', cursor: 'pointer', fontFamily: 'inherit', fontWeight: 500, transition: 'border-color 0.12s, background 0.12s' }}
@@ -232,7 +298,7 @@ function OrderRow({ order, onStatusChange }: { order: Order; onStatusChange: (id
                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
                       <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/>
                     </svg>
-                    Email Customer
+                    Custom Message
                   </button>
                 </div>
               </div>

@@ -108,29 +108,48 @@ function OrderDetail({ order }: { order: Order }) {
 export function AccountClient({ name, image, sessionEmail }: Props) {
   const [orders, setOrders] = useState<Order[] | null>(null)
   const [loadingOrders, setLoadingOrders] = useState(false)
+  const [refreshingOrders, setRefreshingOrders] = useState(false)
   const [expandedId, setExpandedId] = useState<number | null>(null)
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null)
 
   useEffect(() => {
-    if (sessionEmail) fetchOrders(sessionEmail)
+    if (sessionEmail) {
+      fetchOrders(sessionEmail)
+      const interval = setInterval(() => silentRefreshOrders(sessionEmail), 30000)
+      return () => clearInterval(interval)
+    }
   }, [sessionEmail])
 
   async function fetchOrders(emailToSearch: string) {
     if (!emailToSearch) return
     setLoadingOrders(true)
+    await loadOrders(emailToSearch)
+    setLoadingOrders(false)
+  }
+
+  async function silentRefreshOrders(emailToSearch: string) {
+    if (!emailToSearch) return
+    setRefreshingOrders(true)
+    await loadOrders(emailToSearch)
+    setRefreshingOrders(false)
+  }
+
+  async function loadOrders(emailToSearch: string) {
     const controller = new AbortController()
     const timeout = setTimeout(() => controller.abort(), 12000)
     try {
       const res = await fetch(
         `/api/orders/by-email?email=${encodeURIComponent(emailToSearch)}`,
-        { signal: controller.signal }
+        { signal: controller.signal, cache: 'no-store' }
       )
-      if (res.ok) setOrders(await res.json())
-      else setOrders([])
+      if (res.ok) {
+        setOrders(await res.json())
+        setLastUpdated(new Date())
+      } else setOrders([])
     } catch {
       setOrders([])
     } finally {
       clearTimeout(timeout)
-      setLoadingOrders(false)
     }
   }
 
@@ -147,7 +166,31 @@ export function AccountClient({ name, image, sessionEmail }: Props) {
 
       {/* Order History */}
       <section style={{ marginBottom: '48px' }}>
-        <h2 style={{ fontFamily: 'var(--font-playfair, Georgia, serif)', fontSize: '1.4rem', color: '#1A1A18', marginBottom: '16px' }}>Order History</h2>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px', flexWrap: 'wrap', gap: '8px' }}>
+          <h2 style={{ fontFamily: 'var(--font-playfair, Georgia, serif)', fontSize: '1.4rem', color: '#1A1A18', margin: 0 }}>Order History</h2>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            {lastUpdated && !loadingOrders && (
+              <span style={{ fontSize: '11px', color: '#B0A8A0' }}>
+                {refreshingOrders ? 'Refreshing…' : `Updated ${lastUpdated.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}`}
+              </span>
+            )}
+            {sessionEmail && !loadingOrders && (
+              <button
+                onClick={() => silentRefreshOrders(sessionEmail)}
+                disabled={refreshingOrders}
+                style={{ display: 'flex', alignItems: 'center', gap: '5px', padding: '5px 12px', borderRadius: '100px', border: '1.5px solid #E4DBD0', background: 'white', fontSize: '11px', fontWeight: 500, color: '#6B6560', cursor: 'pointer', fontFamily: 'inherit', transition: 'border-color 0.12s', opacity: refreshingOrders ? 0.6 : 1 }}
+                onMouseEnter={e => (e.currentTarget.style.borderColor = '#1A1A18')}
+                onMouseLeave={e => (e.currentTarget.style.borderColor = '#E4DBD0')}
+              >
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" style={refreshingOrders ? { animation: 'spin 1s linear infinite' } : {}}>
+                  <polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
+                </svg>
+                Refresh
+              </button>
+            )}
+          </div>
+        </div>
+        <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
 
         {loadingOrders && <p style={{ color: '#9A918A', fontSize: '13px' }}>Loading orders…</p>}
 

@@ -126,6 +126,11 @@ export function newCodOrderSellerHtml(o: {
 // ── Order status updates ─────────────────────────────────────────────────────
 
 const STATUS_COPY: Partial<Record<string, { subject: string; heading: string; body: string }>> = {
+  placed: {
+    subject: 'Your PokéCraft order is confirmed! 🧶',
+    heading: 'Order confirmed!',
+    body: 'Your order has been confirmed and we\'re getting started on your handmade plushie. Expected delivery is 7–10 business days.',
+  },
   shipped: {
     subject: 'Your PokéCraft order has shipped! 📦',
     heading: 'Your order is on its way!',
@@ -140,6 +145,11 @@ const STATUS_COPY: Partial<Record<string, { subject: string; heading: string; bo
     subject: 'Your PokéCraft order has been cancelled',
     heading: 'Order cancelled',
     body: 'Your order has been cancelled. If you did not request this or have any questions, please get in touch.',
+  },
+  returned: {
+    subject: 'Your PokéCraft order return has been processed',
+    heading: 'Return processed',
+    body: 'Your return has been processed. If you have any questions about next steps, please don\'t hesitate to reach out.',
   },
 }
 

@@ -3,19 +3,44 @@ import { sql } from '@/lib/db'
 import { mailer } from '@/lib/mailer'
 
 export async function POST(req: NextRequest) {
-  const { email, name, password } = await req.json()
-  if (!email || !name || !password) return NextResponse.json({ error: 'Missing fields' }, { status: 400 })
+  let body: { email?: string; name?: string; password?: string }
+  try {
+    body = await req.json()
+  } catch {
+    return NextResponse.json({ error: 'Request body must be valid JSON', code: 'INVALID_JSON' }, { status: 400 })
+  }
+
+  const { email, name, password } = body
+  if (!email || !name || !password) {
+    return NextResponse.json({ error: 'email, name, and password are required', code: 'MISSING_FIELDS' }, { status: 400 })
+  }
 
   const normalised = String(email).toLowerCase().trim()
 
-  // Guard: don't allow duplicate username or email
-  const existing = await sql`SELECT id FROM site_users WHERE username = ${normalised} OR email = ${normalised} LIMIT 1`
-  if (existing.length > 0) return NextResponse.json({ error: 'An account with this email already exists.' }, { status: 409 })
+  let existing: unknown[]
+  try {
+    existing = await sql`SELECT id FROM site_users WHERE username = ${normalised} OR email = ${normalised} LIMIT 1`
+  } catch (err) {
+    console.error('[POST /api/auth/complete-signup] DB lookup failed:', err)
+    return NextResponse.json({ error: 'Failed to check account availability', code: 'DB_ERROR' }, { status: 500 })
+  }
+  if (existing.length > 0) {
+    return NextResponse.json({ error: 'An account with this email already exists.', code: 'EMAIL_TAKEN' }, { status: 409 })
+  }
 
-  await sql`
-    INSERT INTO site_users (username, password, name, role, email)
-    VALUES (${normalised}, ${String(password)}, ${String(name).trim()}, 'guest', ${normalised})
-  `
+  try {
+    await sql`
+      INSERT INTO site_users (username, password, name, role, email)
+      VALUES (${normalised}, ${String(password)}, ${String(name).trim()}, 'guest', ${normalised})
+    `
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err)
+    console.error('[POST /api/auth/complete-signup] INSERT failed:', msg)
+    if (msg.toLowerCase().includes('unique') || msg.toLowerCase().includes('duplicate')) {
+      return NextResponse.json({ error: 'An account with this email already exists.', code: 'EMAIL_TAKEN' }, { status: 409 })
+    }
+    return NextResponse.json({ error: 'Failed to create account', code: 'DB_ERROR' }, { status: 500 })
+  }
 
   // Welcome email
   try {

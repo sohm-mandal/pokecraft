@@ -4,9 +4,16 @@ import { customOrderRequestSellerHtml, customOrderConfirmedCustomerHtml } from '
 import { CustomOrderSchema, parseBody } from '@/lib/schemas'
 
 export async function POST(req: NextRequest) {
-  const parsed = parseBody(CustomOrderSchema, await req.json())
+  let body: unknown
+  try {
+    body = await req.json()
+  } catch {
+    return NextResponse.json({ error: 'Request body must be valid JSON', code: 'INVALID_JSON' }, { status: 400 })
+  }
+
+  const parsed = parseBody(CustomOrderSchema, body)
   if (!parsed.success) {
-    return NextResponse.json({ error: parsed.error }, { status: 400 })
+    return NextResponse.json({ error: parsed.error, code: 'VALIDATION_ERROR' }, { status: 400 })
   }
 
   const { name, email, phone, pokemon, details } = parsed.data

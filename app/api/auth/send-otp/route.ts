@@ -3,41 +3,67 @@ import { sql } from '@/lib/db'
 import { mailer } from '@/lib/mailer'
 
 export async function POST(req: NextRequest) {
-  const { email, mode } = await req.json()
-  if (!email) return NextResponse.json({ error: 'Email required' }, { status: 400 })
+  let body: { email?: string; mode?: string }
+  try {
+    body = await req.json()
+  } catch {
+    return NextResponse.json({ error: 'Request body must be valid JSON', code: 'INVALID_JSON' }, { status: 400 })
+  }
+
+  const { email, mode } = body
+  if (!email) return NextResponse.json({ error: 'email is required', code: 'MISSING_EMAIL' }, { status: 400 })
+  if (!mode) return NextResponse.json({ error: 'mode is required (signup or forgot-password)', code: 'MISSING_MODE' }, { status: 400 })
 
   const normalised = String(email).toLowerCase().trim()
 
-  // Check if user exists — match on email column OR username (covers all account types)
-  const existing = await sql`
-    SELECT id FROM site_users
-    WHERE email = ${normalised} OR username = ${normalised}
-    LIMIT 1
-  `
-  const userExists = existing.length > 0
+  let userExists: boolean
+  try {
+    const existing = await sql`
+      SELECT id FROM site_users
+      WHERE email = ${normalised} OR username = ${normalised}
+      LIMIT 1
+    `
+    userExists = existing.length > 0
+  } catch (err) {
+    console.error('[POST /api/auth/send-otp] DB lookup failed:', err)
+    return NextResponse.json({ error: 'Failed to check account', code: 'DB_ERROR' }, { status: 500 })
+  }
 
   if (mode === 'signup' && userExists) {
-    return NextResponse.json({ error: 'An account with this email already exists. Please sign in instead.' }, { status: 409 })
+    return NextResponse.json(
+      { error: 'An account with this email already exists. Please sign in instead.', code: 'EMAIL_TAKEN' },
+      { status: 409 }
+    )
   }
 
   if (mode === 'forgot-password' && !userExists) {
-    return NextResponse.json({ error: 'No account found with this email.' }, { status: 404 })
+    return NextResponse.json(
+      { error: 'No account found with this email address.', code: 'ACCOUNT_NOT_FOUND' },
+      { status: 404 }
+    )
   }
 
   const code = Math.floor(100000 + Math.random() * 900000).toString()
   const expiresAt = new Date(Date.now() + 10 * 60 * 1000)
 
-  await sql`
-    INSERT INTO otps (email, code, expires_at)
-    VALUES (${normalised}, ${code}, ${expiresAt.toISOString()})
-    ON CONFLICT (email) DO UPDATE SET code = ${code}, expires_at = ${expiresAt.toISOString()}
-  `
+  try {
+    await sql`
+      INSERT INTO otps (email, code, expires_at)
+      VALUES (${normalised}, ${code}, ${expiresAt.toISOString()})
+      ON CONFLICT (email) DO UPDATE SET code = ${code}, expires_at = ${expiresAt.toISOString()}
+    `
+  } catch (err) {
+    console.error('[POST /api/auth/send-otp] OTP insert failed:', err)
+    return NextResponse.json({ error: 'Failed to generate OTP', code: 'OTP_STORE_ERROR' }, { status: 500 })
+  }
 
   try {
     await mailer.sendMail({
       from: `PokéCraft <${process.env.GMAIL_USER}>`,
       to: normalised,
-      subject: mode === 'forgot-password' ? `Your PokéCraft password reset code: ${code}` : `Your PokéCraft verification code: ${code}`,
+      subject: mode === 'forgot-password'
+        ? `Your PokéCraft password reset code: ${code}`
+        : `Your PokéCraft verification code: ${code}`,
       html: `
         <div style="font-family:sans-serif;max-width:480px;margin:0 auto;color:#1A1A18">
           <h2 style="color:#C9906A">${mode === 'forgot-password' ? 'Reset your password 🔑' : 'Your verification code 🧶'}</h2>
@@ -51,9 +77,12 @@ export async function POST(req: NextRequest) {
         </div>
       `,
     })
-  } catch (e) {
-    console.error('OTP email failed:', e)
-    return NextResponse.json({ error: 'Failed to send email. Please try again.' }, { status: 500 })
+  } catch (err) {
+    console.error('[POST /api/auth/send-otp] Email send failed:', err)
+    return NextResponse.json(
+      { error: 'Failed to send verification email. Please try again.', code: 'EMAIL_SEND_ERROR' },
+      { status: 500 }
+    )
   }
 
   return NextResponse.json({ ok: true })

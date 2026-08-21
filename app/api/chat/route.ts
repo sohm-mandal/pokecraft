@@ -21,10 +21,22 @@ interface Message {
 }
 
 export async function POST(req: NextRequest) {
-  const { messages } = (await req.json()) as { messages: Message[] }
+  let body: { messages?: Message[] }
+  try {
+    body = await req.json()
+  } catch {
+    return NextResponse.json({ error: 'Request body must be valid JSON', code: 'INVALID_JSON' }, { status: 400 })
+  }
+
+  const { messages } = body
+  if (!Array.isArray(messages) || messages.length === 0) {
+    return NextResponse.json({ error: 'messages array is required', code: 'MISSING_MESSAGES' }, { status: 400 })
+  }
 
   const apiKey = process.env.GEMINI_API_KEY
-  if (!apiKey) return NextResponse.json({ error: 'No API key' }, { status: 500 })
+  if (!apiKey) {
+    return NextResponse.json({ error: 'Chat service is not configured', code: 'GEMINI_NOT_CONFIGURED' }, { status: 503 })
+  }
 
   // Fetch live product data
   let productContext = ''
@@ -38,7 +50,7 @@ export async function POST(req: NextRequest) {
     productContext = ''
   }
 
-  // Check if any user message mentions an order ID (a number)
+  // Check if any user message mentions an order ID
   let orderContext = ''
   const allText = messages.map((m) => m.parts.map((p) => p.text).join(' ')).join(' ')
   const orderIdMatch = allText.match(/\border\s*#?\s*(\d+)\b/i) ?? allText.match(/\b(\d{1,6})\b/)
@@ -48,8 +60,7 @@ export async function POST(req: NextRequest) {
       const rows = await sql`SELECT id, status, buyer_name, total_amount, items FROM orders WHERE id = ${Number(orderId)} LIMIT 1`
       const order = rows[0] as { id: number; status: string; buyer_name: string; total_amount: number; items: unknown } | undefined
       if (order) {
-        const total = Math.round(order.total_amount / 100)
-        orderContext = `\n\nOrder #${order.id} lookup result: Customer: ${order.buyer_name}, Status: ${order.status}, Total: ₹${total}`
+        orderContext = `\n\nOrder #${order.id} lookup result: Customer: ${order.buyer_name}, Status: ${order.status}, Total: ₹${Math.round(order.total_amount / 100)}`
       } else {
         orderContext = `\n\nOrder #${orderId} was not found in the system.`
       }
@@ -60,28 +71,38 @@ export async function POST(req: NextRequest) {
 
   const systemPrompt = BASE_PROMPT + productContext + orderContext
 
-  const res = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent`,
-    {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-goog-api-key': apiKey,
-      },
-      body: JSON.stringify({
-        system_instruction: { parts: [{ text: systemPrompt }] },
-        contents: messages,
-      }),
-    }
-  )
+  let res: Response
+  try {
+    res = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-goog-api-key': apiKey },
+        body: JSON.stringify({
+          system_instruction: { parts: [{ text: systemPrompt }] },
+          contents: messages,
+        }),
+      }
+    )
+  } catch (err) {
+    console.error('[POST /api/chat] Network error reaching Gemini:', err)
+    return NextResponse.json({ error: 'Could not reach chat service', code: 'GEMINI_NETWORK_ERROR' }, { status: 502 })
+  }
 
   if (!res.ok) {
-    const err = await res.text()
-    console.error('Gemini API error:', res.status, err)
-    return NextResponse.json({ text: `Sorry, I'm having trouble right now. Please try again in a moment.` })
+    const errText = await res.text().catch(() => '')
+    console.error('[POST /api/chat] Gemini API error:', res.status, errText)
+    return NextResponse.json(
+      { error: 'Chat service returned an error', code: 'GEMINI_API_ERROR', detail: `HTTP ${res.status}` },
+      { status: 502 }
+    )
   }
 
   const data = await res.json()
-  const text = data.candidates?.[0]?.content?.parts?.[0]?.text ?? 'Sorry, I could not get a response.'
+  const text = data.candidates?.[0]?.content?.parts?.[0]?.text
+  if (!text) {
+    return NextResponse.json({ error: 'Empty response from chat service', code: 'GEMINI_EMPTY_RESPONSE' }, { status: 502 })
+  }
+
   return NextResponse.json({ text })
 }

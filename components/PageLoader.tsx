@@ -15,6 +15,8 @@ function PageLoaderInner() {
   // Intercept link clicks to start the loader immediately
   useEffect(() => {
     function onLinkClick(e: MouseEvent) {
+      // Clicks inside a <button> are UI actions, not navigation — skip
+      if ((e.target as Element).closest('button')) return
       const target = (e.target as Element).closest('a')
       if (!target) return
       const href = target.getAttribute('href')

@@ -28,6 +28,32 @@ export default function AboutPage() {
         </p>
       </div>
 
+      {/* Test Notice */}
+      <div style={{ borderTop: '1px solid #E4DBD0', margin: '56px 0' }} />
+      <p style={{ fontSize: '10px', letterSpacing: '0.2em', textTransform: 'uppercase', color: '#C9906A', marginBottom: '16px', fontWeight: 500 }}>For Testing</p>
+      <h2 style={{ fontFamily: 'var(--font-playfair, Georgia, serif)', fontSize: '2rem', color: '#1A1A18', marginBottom: '16px', lineHeight: 1.2 }}>
+        We have made this for test
+      </h2>
+      <p style={{ fontSize: '14px', lineHeight: 1.7, color: '#6B6560', fontWeight: 300, marginBottom: '24px' }}>
+        Use the card details below to make a test payment — no real money is charged.
+      </p>
+      <div style={{ background: '#F0EAE0', border: '1.5px solid #E4DBD0', borderRadius: '16px', padding: '24px 28px', display: 'inline-flex', flexDirection: 'column', gap: '12px', fontFamily: 'monospace', fontSize: '14px' }}>
+        <div style={{ display: 'flex', gap: '32px', flexWrap: 'wrap' }}>
+          <div>
+            <p style={{ fontSize: '10px', letterSpacing: '0.14em', textTransform: 'uppercase', color: '#9A918A', margin: '0 0 4px', fontFamily: 'inherit' }}>Card Number</p>
+            <p style={{ color: '#1A1A18', margin: 0, fontWeight: 600, letterSpacing: '0.08em' }}>4100 2800 0000 1007</p>
+          </div>
+          <div>
+            <p style={{ fontSize: '10px', letterSpacing: '0.14em', textTransform: 'uppercase', color: '#9A918A', margin: '0 0 4px', fontFamily: 'inherit' }}>CVV</p>
+            <p style={{ color: '#1A1A18', margin: 0, fontWeight: 600 }}>123</p>
+          </div>
+          <div>
+            <p style={{ fontSize: '10px', letterSpacing: '0.14em', textTransform: 'uppercase', color: '#9A918A', margin: '0 0 4px', fontFamily: 'inherit' }}>Expiry</p>
+            <p style={{ color: '#1A1A18', margin: 0, fontWeight: 600 }}>12/26</p>
+          </div>
+        </div>
+      </div>
+
       {/* Connect */}
       <div style={{ marginTop: '36px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
         <a

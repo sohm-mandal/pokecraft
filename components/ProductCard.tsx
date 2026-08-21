@@ -13,13 +13,20 @@ interface Props {
 
 export function ProductCard({ product }: Props) {
   const [hovered, setHovered] = useState(false)
+  const [toggling, setToggling] = useState(false)
   const { inWishlist, toggle } = useWishlist()
   const wishlisted = inWishlist(product.id)
 
-  function toggleWishlist(e: React.MouseEvent) {
+  async function toggleWishlist(e: React.MouseEvent) {
     e.preventDefault()
     e.stopPropagation()
-    toggle(product.id)
+    if (toggling) return
+    setToggling(true)
+    try {
+      await toggle(product.id)
+    } finally {
+      setToggling(false)
+    }
   }
 
   const rupees = (product.price / 100).toLocaleString('en-IN', {
@@ -49,6 +56,7 @@ export function ProductCard({ product }: Props) {
         {/* Wishlist button — appears on hover */}
         <button
           onClick={toggleWishlist}
+          disabled={toggling}
           title={wishlisted ? 'Remove from wishlist' : 'Add to wishlist'}
           style={{
             position: 'absolute', top: '10px', right: '10px',
@@ -57,17 +65,24 @@ export function ProductCard({ product }: Props) {
             border: '1.5px solid #E4DBD0',
             borderRadius: '50%',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            cursor: 'pointer',
+            cursor: toggling ? 'default' : 'pointer',
             opacity: hovered || wishlisted ? 1 : 0,
             transform: hovered || wishlisted ? 'scale(1)' : 'scale(0.8)',
             transition: 'opacity 0.2s, transform 0.2s',
             boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
           }}
         >
-          <svg width="16" height="16" viewBox="0 0 24 24" fill={wishlisted ? '#E05252' : 'none'} stroke={wishlisted ? '#E05252' : '#6B6560'} strokeWidth="1.8" strokeLinecap="round">
-            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
-          </svg>
+          {toggling ? (
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#C9906A" strokeWidth="2.5" strokeLinecap="round" style={{ animation: 'wishlistSpin 0.7s linear infinite' }}>
+              <path d="M12 2a10 10 0 0 1 10 10" />
+            </svg>
+          ) : (
+            <svg width="16" height="16" viewBox="0 0 24 24" fill={wishlisted ? '#E05252' : 'none'} stroke={wishlisted ? '#E05252' : '#6B6560'} strokeWidth="1.8" strokeLinecap="round">
+              <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+            </svg>
+          )}
         </button>
+        <style>{`@keyframes wishlistSpin { to { transform: rotate(360deg) } }`}</style>
       </div>
 
       <div>

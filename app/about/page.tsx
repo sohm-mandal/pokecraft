@@ -1,3 +1,6 @@
+import Image from 'next/image'
+import sohamImg from '@/assets/soham.png'
+
 export default function AboutPage() {
   return (
     <div style={{ maxWidth: '720px', margin: '0 auto', padding: '80px 1.5rem' }}>
@@ -16,9 +19,14 @@ export default function AboutPage() {
 
       {/* About Me */}
       <p style={{ fontSize: '10px', letterSpacing: '0.2em', textTransform: 'uppercase', color: '#C9906A', marginBottom: '16px', fontWeight: 500 }}>About Me</p>
-      <h2 style={{ fontFamily: 'var(--font-playfair, Georgia, serif)', fontSize: '2rem', color: '#1A1A18', marginBottom: '24px', lineHeight: 1.2 }}>
-        Hi, I&apos;m Soham.
-      </h2>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '24px', marginBottom: '24px' }}>
+        <div style={{ position: 'relative', width: '80px', height: '80px', borderRadius: '50%', overflow: 'hidden', flexShrink: 0, border: '2px solid #E4DBD0' }}>
+          <Image src={sohamImg} alt="Soham" fill style={{ objectFit: 'cover' }} />
+        </div>
+        <h2 style={{ fontFamily: 'var(--font-playfair, Georgia, serif)', fontSize: '2rem', color: '#1A1A18', lineHeight: 1.2, margin: 0 }}>
+          Hi, I&apos;m Soham.
+        </h2>
+      </div>
       <div style={{ fontSize: '15px', lineHeight: 1.8, color: '#6B6560', fontWeight: 300, display: 'flex', flexDirection: 'column', gap: '20px' }}>
         <p>
           I&apos;m the person behind every stitch at PokéCraft. What started as a hobby — crocheting Pokémon for friends and family — grew into something I genuinely love sharing with the world. I hand-craft every single plushie myself, with care and attention that I hope you can feel the moment you hold one.

@@ -18,7 +18,7 @@ export function StarBackground() {
       ctx.clearRect(0, 0, canvas.width, canvas.height)
 
       const area = canvas.width * canvas.height
-      const count = Math.floor(area / 5500)
+      const count = Math.floor(area / 2800)
 
       for (let i = 0; i < count; i++) {
         const x = Math.random() * canvas.width

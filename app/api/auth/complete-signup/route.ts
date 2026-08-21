@@ -53,7 +53,7 @@ export async function POST(req: NextRequest) {
   try {
     await mailer.sendMail({
       from: `PokéCraft <${process.env.GMAIL_USER}>`,
-      to: normalised,
+      to: normalisedEmail,
       subject: 'Welcome to PokéCraft! 🧶',
       html: `
         <div style="font-family:sans-serif;max-width:480px;margin:0 auto;color:#1A1A18">

@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { sql } from '@/lib/db'
 import type { Product } from '@/types'
 import { ProductCard } from '@/components/ProductCard'
+import { StarBackground } from '@/components/StarBackground'
 
 export const dynamic = 'force-dynamic'
 
@@ -20,34 +21,25 @@ export default async function HomePage() {
   return (
     <>
       {/* ── HERO ── */}
-      <section className="hero-section" style={{ display: 'flex', overflow: 'hidden' }}>
-        {/* Left */}
-        <div className="hero-left" style={{ padding: '56px 32px', display: 'flex', flexDirection: 'column', justifyContent: 'center', background: '#F8F5F0' }}>
-          <p style={{ fontSize: '11px', letterSpacing: '0.18em', textTransform: 'uppercase', color: '#C9906A', fontWeight: 400, marginBottom: '24px' }}>
+      <section className="hero-section" style={{ position: 'relative', overflow: 'hidden', background: 'var(--color-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <StarBackground />
+        <div style={{ position: 'relative', zIndex: 1, textAlign: 'center', padding: '72px 24px', maxWidth: '640px' }}>
+          <p style={{ fontSize: '11px', letterSpacing: '0.22em', textTransform: 'uppercase', color: 'var(--color-accent)', fontWeight: 500, marginBottom: '28px' }}>
             Handmade Crochet Pokémon
           </p>
-          <h1 style={{ fontFamily: 'var(--font-playfair, Georgia, serif)', fontSize: '58px', fontWeight: 500, lineHeight: 1.06, letterSpacing: '-0.02em', color: '#1A1A18', marginBottom: '24px' }}>
-            Handmade<br/>with love.<br/>Made to be<br/>yours. <span style={{ color: '#C9A040' }}>♥</span>
+          <h1 style={{ fontFamily: 'var(--font-serif)', fontSize: 'clamp(42px, 7vw, 68px)', fontWeight: 500, lineHeight: 1.06, letterSpacing: '-0.02em', color: 'var(--color-ink)', marginBottom: '24px' }}>
+            Handmade with love.<br/>Made to be yours.{' '}
+            <span style={{ color: '#C9A040' }}>♥</span>
           </h1>
-          <p style={{ fontSize: '15px', lineHeight: 1.65, color: '#6B6560', fontWeight: 300, maxWidth: '360px', marginBottom: '44px' }}>
+          <p style={{ fontSize: '15px', lineHeight: 1.7, color: 'var(--color-muted-2)', fontWeight: 300, marginBottom: '48px' }}>
             Adorable, high-quality crochet Pokémon made with premium yarn and endless care.
           </p>
           <Link
             href="/shop"
-            style={{ display: 'inline-flex', alignItems: 'center', gap: '12px', background: '#1A1A18', color: '#F8F5F0', padding: '15px 32px', fontSize: '11px', letterSpacing: '0.18em', textTransform: 'uppercase', fontWeight: 500, textDecoration: 'none', alignSelf: 'flex-start' }}
+            style={{ display: 'inline-flex', alignItems: 'center', gap: '12px', background: 'var(--color-ink)', color: 'var(--color-fg-on-ink)', padding: '15px 40px', fontSize: '11px', letterSpacing: '0.18em', textTransform: 'uppercase', fontWeight: 500, textDecoration: 'none' }}
           >
             Shop Collection
           </Link>
-        </div>
-
-        {/* Right — YouTube video */}
-        <div className="hero-right" style={{ position: 'relative', overflow: 'hidden', background: '#1A1A18' }}>
-          <iframe
-            src="https://www.youtube.com/embed/gj-G0frikmI?autoplay=1&mute=1&loop=1&playlist=gj-G0frikmI&rel=0&modestbranding=1&controls=1"
-            allow="autoplay; encrypted-media; picture-in-picture"
-            allowFullScreen
-            style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', border: 'none' }}
-          />
         </div>
       </section>
 
@@ -99,14 +91,10 @@ export default async function HomePage() {
       )}
 
       <style>{`
-        .hero-section { height: 580px; }
-        .hero-left { width: 44%; }
-        .hero-right { flex: 1; min-height: 300px; }
+        .hero-section { min-height: 540px; }
         .products-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
         @media (max-width: 768px) {
-          .hero-section { height: auto; flex-direction: column; }
-          .hero-left { width: 100%; padding: 48px 24px !important; }
-          .hero-right { width: 100%; min-height: 280px; }
+          .hero-section { min-height: 420px; }
           .products-grid { grid-template-columns: repeat(2, 1fr); gap: 14px; }
         }
         @media (max-width: 480px) {

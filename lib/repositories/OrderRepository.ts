@@ -62,4 +62,17 @@ export const OrderRepository = {
       UPDATE orders SET status = ${status}, razorpay_payment_id = ${paymentId} WHERE id = ${id}
     `
   },
+
+  // Atomic claim: transitions status from 'pending' → 'placed' and sets the payment ID
+  // in a single UPDATE. Returns true only if THIS caller won the race.
+  // A concurrent caller (webhook vs verify-payment) will see 0 rows and return false.
+  async claimForConfirmation(id: number, paymentId: string): Promise<boolean> {
+    const rows = await sql`
+      UPDATE orders
+      SET status = 'placed', razorpay_payment_id = ${paymentId}
+      WHERE id = ${id} AND status = 'pending'
+      RETURNING id
+    `
+    return rows.length > 0
+  },
 }

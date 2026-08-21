@@ -89,9 +89,26 @@ export const OrderService = {
   },
 
   async confirmOnlinePayment(order: Order, razorpayPaymentId: string): Promise<void> {
+    // Atomic claim: only the first caller (verify-payment vs webhook race) proceeds.
+    // The second caller sees status already 'placed' and returns — no double stock
+    // decrement, no double emails.
+    const claimed = await OrderRepository.claimForConfirmation(order.id, razorpayPaymentId)
+    if (!claimed) {
+      console.log(`[OrderService.confirmOnlinePayment] Order #${order.id} already claimed — skipping (idempotent)`)
+      return
+    }
+
     const items = order.items as OrderItem[]
-    await decrementStock(items)
-    await OrderRepository.updateStatusAndPaymentId(order.id, 'placed', razorpayPaymentId)
+
+    try {
+      await decrementStock(items)
+    } catch (err) {
+      // Stock failed — roll back the status claim so the order doesn't sit as 'placed'
+      // with no stock decremented. Mark it cancelled so the admin can see it.
+      await OrderRepository.updateStatus(order.id, 'cancelled')
+      console.error(`[OrderService.confirmOnlinePayment] Stock decrement failed for order #${order.id}, marked cancelled:`, err)
+      throw err
+    }
 
     const from = `PokéCraft <${sellerEmail()}>`
     const seller = sellerEmail()

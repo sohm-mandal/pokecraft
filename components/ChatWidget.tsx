@@ -2,6 +2,24 @@
 
 import { useState, useRef, useEffect } from 'react'
 
+function formatMessage(text: string) {
+  const lines = text.split('\n')
+  return lines.map((line, i) => {
+    // Bullet point
+    const isBullet = /^[-*]\s+/.test(line)
+    const content = line.replace(/^[-*]\s+/, '')
+    // Bold: **text**
+    const parts = (isBullet ? content : line).split(/\*\*(.*?)\*\*/g)
+    const formatted = parts.map((p, j) =>
+      j % 2 === 1 ? <strong key={j}>{p}</strong> : <span key={j}>{p}</span>
+    )
+    if (isBullet) {
+      return <div key={i} style={{ display: 'flex', gap: '6px', marginTop: i === 0 ? 0 : '4px' }}><span style={{ flexShrink: 0 }}>•</span><span>{formatted}</span></div>
+    }
+    return <div key={i} style={{ marginTop: i === 0 ? 0 : '6px' }}>{formatted}</div>
+  })
+}
+
 interface Message {
   role: 'user' | 'model'
   parts: { text: string }[]
@@ -95,7 +113,7 @@ export function ChatWidget() {
                   fontSize: '13px', lineHeight: 1.5,
                   border: m.role === 'model' ? '1px solid #E4DBD0' : 'none',
                 }}>
-                  {m.parts[0].text}
+                  {formatMessage(m.parts[0].text)}
                 </div>
               </div>
             ))}

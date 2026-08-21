@@ -6,34 +6,46 @@ import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 
 const inputStyle: React.CSSProperties = {
-  border: '1.5px solid #E4DBD0', borderRadius: '10px', padding: '13px 16px',
-  fontSize: '14px', fontFamily: 'inherit', background: '#FDFAF7', outline: 'none',
-  width: '100%', boxSizing: 'border-box', color: '#1A1A18',
+  border: '1.5px solid var(--color-border)',
+  borderRadius: '10px',
+  padding: '13px 16px',
+  fontSize: '14px',
+  fontFamily: 'inherit',
+  background: 'var(--color-surface)',
+  outline: 'none',
+  width: '100%',
+  boxSizing: 'border-box',
+  color: 'var(--color-ink)',
   transition: 'border-color 0.15s',
+}
+
+function EyeIcon({ open }: { open: boolean }) {
+  return open ? (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/>
+      <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/>
+      <line x1="1" y1="1" x2="23" y2="23"/>
+    </svg>
+  ) : (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+      <circle cx="12" cy="12" r="3"/>
+    </svg>
+  )
 }
 
 function PokeBallIllustration() {
   return (
     <svg viewBox="0 0 320 320" width="260" height="260" style={{ filter: 'drop-shadow(0 24px 48px rgba(0,0,0,0.18))' }}>
-      {/* Outer circle */}
       <circle cx="160" cy="160" r="148" fill="white" opacity="0.15"/>
       <circle cx="160" cy="160" r="130" fill="white" opacity="0.1"/>
-
-      {/* Top half */}
       <path d="M32 160 A128 128 0 0 1 288 160 Z" fill="#E05252"/>
-      {/* Bottom half */}
       <path d="M32 160 A128 128 0 0 0 288 160 Z" fill="white"/>
-      {/* Outer ring */}
-      <circle cx="160" cy="160" r="128" fill="none" stroke="#1A1A18" strokeWidth="8"/>
-      {/* Middle band */}
-      <rect x="32" y="148" width="256" height="24" fill="#1A1A18"/>
-
-      {/* Center button outer */}
-      <circle cx="160" cy="160" r="38" fill="#1A1A18"/>
+      <circle cx="160" cy="160" r="128" fill="none" stroke="var(--color-ink)" strokeWidth="8"/>
+      <rect x="32" y="148" width="256" height="24" fill="var(--color-ink)"/>
+      <circle cx="160" cy="160" r="38" fill="var(--color-ink)"/>
       <circle cx="160" cy="160" r="30" fill="white"/>
-      <circle cx="160" cy="160" r="22" fill="#F5F0EB"/>
-
-      {/* Crochet texture dots on top half */}
+      <circle cx="160" cy="160" r="22" fill="var(--color-bg)"/>
       <circle cx="100" cy="120" r="5" fill="white" opacity="0.4"/>
       <circle cx="130" cy="100" r="4" fill="white" opacity="0.35"/>
       <circle cx="165" cy="95" r="5" fill="white" opacity="0.4"/>
@@ -42,18 +54,14 @@ function PokeBallIllustration() {
       <circle cx="80" cy="145" r="4" fill="white" opacity="0.3"/>
       <circle cx="115" cy="140" r="3" fill="white" opacity="0.3"/>
       <circle cx="240" cy="145" r="3" fill="white" opacity="0.25"/>
-
-      {/* Stars / sparkles */}
       <g fill="#FBBC05" opacity="0.9">
         <path d="M68 72 l4 10 l10 4 l-10 4 l-4 10 l-4-10 l-10-4 l10-4 Z"/>
         <path d="M252 68 l3 7 l7 3 l-7 3 l-3 7 l-3-7 l-7-3 l7-3 Z"/>
         <path d="M88 210 l2.5 6 l6 2.5 l-6 2.5 l-2.5 6 l-2.5-6 l-6-2.5 l6-2.5 Z"/>
         <path d="M232 218 l2 5 l5 2 l-5 2 l-2 5 l-2-5 l-5-2 l5-2 Z"/>
       </g>
-
-      {/* Yarn loop suggestion */}
-      <path d="M55 185 Q80 200 95 190 Q110 180 125 195" stroke="#C9906A" strokeWidth="4" fill="none" strokeLinecap="round" opacity="0.8"/>
-      <path d="M195 192 Q215 182 235 195 Q250 205 265 195" stroke="#C9906A" strokeWidth="4" fill="none" strokeLinecap="round" opacity="0.8"/>
+      <path d="M55 185 Q80 200 95 190 Q110 180 125 195" stroke="var(--color-accent)" strokeWidth="4" fill="none" strokeLinecap="round" opacity="0.8"/>
+      <path d="M195 192 Q215 182 235 195 Q250 205 265 195" stroke="var(--color-accent)" strokeWidth="4" fill="none" strokeLinecap="round" opacity="0.8"/>
     </svg>
   )
 }
@@ -66,6 +74,7 @@ function LoginForm() {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const [focusedField, setFocusedField] = useState<string | null>(null)
+  const [showPassword, setShowPassword] = useState(false)
 
   const dest = callbackUrl === '/login' ? '/' : callbackUrl
 
@@ -93,16 +102,15 @@ function LoginForm() {
         .login-page-wrap {
           min-height: 100vh;
           display: flex;
-          background: #F8F5F0;
+          background: var(--color-bg);
         }
 
-        /* Left panel */
         .login-image-panel {
           display: none;
           flex-direction: column;
           align-items: center;
           justify-content: center;
-          background: linear-gradient(155deg, #2A1F18 0%, #1A1A18 40%, #3D1A0E 100%);
+          background: linear-gradient(155deg, var(--color-panel-bg-start) 0%, var(--color-panel-bg-mid) 40%, var(--color-panel-bg-end) 100%);
           position: relative;
           overflow: hidden;
           padding: 60px 48px;
@@ -112,7 +120,6 @@ function LoginForm() {
           .login-image-panel { display: flex; }
         }
 
-        /* Decorative rings */
         .login-image-panel::before {
           content: '';
           position: absolute;
@@ -138,14 +145,14 @@ function LoginForm() {
           font-size: 10px;
           letter-spacing: 0.25em;
           text-transform: uppercase;
-          color: #C9906A;
+          color: var(--color-accent);
           margin-bottom: 28px;
           font-weight: 500;
         }
         .login-panel-heading {
           font-family: 'Playfair Display', Georgia, serif;
           font-size: 2rem;
-          color: #F8F5F0;
+          color: var(--color-fg-on-ink);
           text-align: center;
           line-height: 1.3;
           margin: 0 0 16px;
@@ -170,12 +177,11 @@ function LoginForm() {
           background: rgba(201,144,106,0.4);
         }
         .login-panel-dots span.active {
-          background: #C9906A;
+          background: var(--color-accent);
           width: 20px;
           border-radius: 3px;
         }
 
-        /* Right panel */
         .login-form-panel {
           flex: 1;
           display: flex;
@@ -194,14 +200,14 @@ function LoginForm() {
           font-size: 10px;
           letter-spacing: 0.22em;
           text-transform: uppercase;
-          color: #C9906A;
+          color: var(--color-accent);
           margin: 0 0 10px;
           font-weight: 500;
         }
         .login-heading {
           font-family: 'Playfair Display', Georgia, serif;
           font-size: 2rem;
-          color: #1A1A18;
+          color: var(--color-ink);
           margin: 0 0 36px;
           line-height: 1.2;
         }
@@ -213,18 +219,18 @@ function LoginForm() {
           gap: 12px;
           width: 100%;
           padding: 14px 24px;
-          border: 1.5px solid #E4DBD0;
+          border: 1.5px solid var(--color-border);
           border-radius: 10px;
           background: white;
           cursor: pointer;
           font-size: 14px;
           font-weight: 500;
-          color: #1A1A18;
+          color: var(--color-ink);
           font-family: inherit;
           transition: border-color 0.15s, box-shadow 0.15s;
         }
         .google-btn:hover {
-          border-color: #C9906A;
+          border-color: var(--color-accent);
           box-shadow: 0 2px 12px rgba(201,144,106,0.12);
         }
 
@@ -234,12 +240,12 @@ function LoginForm() {
           gap: 12px;
           padding: 4px 0;
         }
-        .divider-line { flex: 1; height: 1px; background: #E4DBD0; }
-        .divider-text { font-size: 11px; color: #B0A8A0; white-space: nowrap; }
+        .divider-line { flex: 1; height: 1px; background: var(--color-border); }
+        .divider-text { font-size: 11px; color: var(--color-muted-3); white-space: nowrap; }
 
         .signin-btn {
-          background: #1A1A18;
-          color: #F8F5F0;
+          background: var(--color-ink);
+          color: var(--color-fg-on-ink);
           border: none;
           border-radius: 10px;
           padding: 14px;
@@ -251,32 +257,31 @@ function LoginForm() {
           width: 100%;
           transition: opacity 0.15s, background 0.15s;
         }
-        .signin-btn:hover:not(:disabled) { background: #2D2D2A; }
+        .signin-btn:hover:not(:disabled) { background: var(--color-ink-hover); }
         .signin-btn:disabled { opacity: 0.55; cursor: not-allowed; }
 
         .forgot-link {
           font-size: 12px;
-          color: #C9906A;
+          color: var(--color-accent);
           text-decoration: none;
         }
         .forgot-link:hover { text-decoration: underline; }
 
-        /* New account section */
         .new-account-section {
           margin-top: 32px;
           padding-top: 28px;
-          border-top: 1.5px solid #E4DBD0;
+          border-top: 1.5px solid var(--color-border);
         }
         .new-account-label {
           font-size: 11px;
           letter-spacing: 0.14em;
           text-transform: uppercase;
-          color: #9A918A;
+          color: var(--color-muted);
           text-align: center;
           margin: 0 0 14px;
         }
         .new-account-label strong {
-          color: #1A1A18;
+          color: var(--color-ink);
           font-weight: 600;
         }
         .new-account-btn {
@@ -286,21 +291,21 @@ function LoginForm() {
           gap: 8px;
           width: 100%;
           padding: 14px 24px;
-          border: 2px solid #1A1A18;
+          border: 2px solid var(--color-ink);
           border-radius: 10px;
           background: transparent;
           cursor: pointer;
           font-size: 14px;
           font-weight: 600;
-          color: #1A1A18;
+          color: var(--color-ink);
           font-family: inherit;
           text-decoration: none;
           transition: background 0.15s, color 0.15s;
           box-sizing: border-box;
         }
         .new-account-btn:hover {
-          background: #1A1A18;
-          color: #F8F5F0;
+          background: var(--color-ink);
+          color: var(--color-fg-on-ink);
         }
         .new-account-perks {
           display: flex;
@@ -314,14 +319,30 @@ function LoginForm() {
           align-items: center;
           gap: 5px;
           font-size: 11px;
-          color: #9A918A;
+          color: var(--color-muted);
         }
         .perk-dot {
           width: 5px; height: 5px;
           border-radius: 50%;
-          background: #C9906A;
+          background: var(--color-accent);
           flex-shrink: 0;
         }
+
+        .eye-btn {
+          position: absolute;
+          right: 12px;
+          top: 50%;
+          transform: translateY(-50%);
+          background: none;
+          border: none;
+          padding: 4px;
+          cursor: pointer;
+          color: var(--color-muted);
+          display: flex;
+          align-items: center;
+          line-height: 0;
+        }
+        .eye-btn:hover { color: var(--color-ink); }
       `}</style>
 
       <div className="login-page-wrap">
@@ -350,10 +371,7 @@ function LoginForm() {
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
               {/* Google */}
-              <button
-                className="google-btn"
-                onClick={() => signIn('google', { callbackUrl: dest })}
-              >
+              <button className="google-btn" onClick={() => signIn('google', { callbackUrl: dest })}>
                 <svg width="18" height="18" viewBox="0 0 24 24">
                   <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
                   <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
@@ -379,20 +397,33 @@ function LoginForm() {
                   placeholder="Username or Email"
                   required
                   autoComplete="username"
-                  style={{ ...inputStyle, borderColor: focusedField === 'username' ? '#C9906A' : '#E4DBD0' }}
+                  style={{ ...inputStyle, borderColor: focusedField === 'username' ? 'var(--color-accent)' : 'var(--color-border)' }}
                 />
-                <input
-                  type="password"
-                  value={password}
-                  onChange={e => setPassword(e.target.value)}
-                  onFocus={() => setFocusedField('password')}
-                  onBlur={() => setFocusedField(null)}
-                  placeholder="Password"
-                  required
-                  autoComplete="current-password"
-                  style={{ ...inputStyle, borderColor: focusedField === 'password' ? '#C9906A' : '#E4DBD0' }}
-                />
-                {error && <p style={{ color: '#E05252', fontSize: '13px', margin: 0 }}>{error}</p>}
+
+                <div style={{ position: 'relative' }}>
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    value={password}
+                    onChange={e => setPassword(e.target.value)}
+                    onFocus={() => setFocusedField('password')}
+                    onBlur={() => setFocusedField(null)}
+                    placeholder="Password"
+                    required
+                    autoComplete="current-password"
+                    style={{ ...inputStyle, borderColor: focusedField === 'password' ? 'var(--color-accent)' : 'var(--color-border)', paddingRight: '44px' }}
+                  />
+                  <button
+                    type="button"
+                    className="eye-btn"
+                    onClick={() => setShowPassword(v => !v)}
+                    tabIndex={-1}
+                    aria-label={showPassword ? 'Hide password' : 'Show password'}
+                  >
+                    <EyeIcon open={showPassword} />
+                  </button>
+                </div>
+
+                {error && <p style={{ color: 'var(--color-error)', fontSize: '13px', margin: 0 }}>{error}</p>}
                 <button type="submit" disabled={loading} className="signin-btn" style={{ marginTop: '4px' }}>
                   {loading ? 'Signing in…' : 'Sign In'}
                 </button>

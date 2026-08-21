@@ -1,12 +1,33 @@
 @import "tailwindcss";
 
 :root {
+  /* Typography */
   --font-sans: var(--font-jost), 'Jost', system-ui, sans-serif;
   --font-serif: var(--font-playfair), 'Playfair Display', Georgia, serif;
+
+  /* Brand palette */
+  --color-ink:        #1A1A18;   /* near-black — primary text, dark buttons */
+  --color-ink-hover:  #2D2D2A;   /* button hover */
+  --color-bg:         #F8F5F0;   /* warm white page background */
+  --color-surface:    #FDFAF7;   /* input / card surface */
+  --color-accent:     #C9906A;   /* terracotta — brand accent */
+  --color-border:     #E4DBD0;   /* dividers, input borders */
+  --color-muted:      #9A918A;   /* secondary text, icons */
+  --color-muted-2:    #6B6560;   /* slightly darker secondary */
+  --color-muted-3:    #B0A8A0;   /* lightest muted (divider labels) */
+  --color-error:      #E05252;   /* validation errors */
+  --color-fg-on-ink:  #F8F5F0;   /* text on dark (ink) surfaces */
+
+  /* Panel (dark left panel on login) */
+  --color-panel-bg-start: #2A1F18;
+  --color-panel-bg-mid:   #1A1A18;
+  --color-panel-bg-end:   #3D1A0E;
 }
 
 body {
   font-family: var(--font-sans);
+  background: var(--color-bg);
+  color: var(--color-ink);
 }
 
 .font-serif {

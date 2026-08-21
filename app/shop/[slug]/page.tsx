@@ -101,7 +101,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
         {product.description && (
           <p style={{ color: '#6B6560', lineHeight: 1.7, marginBottom: '2rem' }}>{product.description}</p>
         )}
-        <CartButton item={cartItem} disabled={product.stock_count === 0} />
+        <CartButton item={cartItem} stockCount={product.stock_count} disabled={product.stock_count === 0} />
         <WishlistButton productId={product.id} />
         <p style={{ marginTop: '1rem', fontSize: '0.75rem', color: '#6B6560', textAlign: 'center' }}>
           Handmade to order · Ships within 7–10 days · Pan-India delivery

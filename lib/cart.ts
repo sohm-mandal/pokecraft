@@ -17,13 +17,14 @@ export function saveCart(cart: CartItem[]): void {
   localStorage.setItem(CART_KEY, JSON.stringify(cart))
 }
 
-export function addToCart(item: CartItem): CartItem[] {
+export function addToCart(item: CartItem, maxQty?: number): CartItem[] {
   const cart = getCart()
   const existing = cart.find((c) => c.productId === item.productId)
   if (existing) {
-    existing.quantity += item.quantity
+    const next = existing.quantity + item.quantity
+    existing.quantity = maxQty != null ? Math.min(next, maxQty) : next
   } else {
-    cart.push(item)
+    cart.push({ ...item, quantity: maxQty != null ? Math.min(item.quantity, maxQty) : item.quantity })
   }
   saveCart(cart)
   return cart

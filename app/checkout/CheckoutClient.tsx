@@ -86,13 +86,6 @@ export function CheckoutClient({ sessionEmail, sessionName }: Props) {
         email: form.buyer_email,
         contact: form.buyer_phone,
       },
-      // "1" strings are the correct Razorpay API format for enabling methods
-      method: {
-        upi: '1',
-        card: '1',
-        netbanking: '1',
-        wallet: '1',
-      },
       handler: async (response: {
         razorpay_payment_id: string
         razorpay_order_id: string

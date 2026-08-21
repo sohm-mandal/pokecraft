@@ -20,11 +20,11 @@ export const ProductService = {
     pokemon_name: string
     description?: string
     price: number
-    stock_count: number
+    stock_count?: number
     image_url?: string
   }): Promise<Product> {
     const images = data.image_url ? [data.image_url] : []
-    return ProductRepository.insert({ ...data, images })
+    return ProductRepository.insert({ ...data, stock_count: data.stock_count ?? 0, images })
   },
 
   updateStock(id: number, stock_count: number): Promise<void> {

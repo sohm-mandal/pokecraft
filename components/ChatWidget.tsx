@@ -28,7 +28,7 @@ interface Message {
 export function ChatWidget() {
   const [open, setOpen] = useState(false)
   const [messages, setMessages] = useState<Message[]>([
-    { role: 'model', parts: [{ text: 'Hi! 👋 I\'m PokéCraft\'s assistant. Ask me anything about our plushies, shipping, custom orders, or anything else!' }] }
+    { role: 'model', parts: [{ text: 'Hi! 👋 I\'m PokéCraft\'s assistant. Ask me about our plushies, shipping, orders, or custom requests!' }] }
   ])
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
@@ -157,7 +157,7 @@ export function ChatWidget() {
               value={input}
               onChange={e => setInput(e.target.value)}
               onKeyDown={e => e.key === 'Enter' && send()}
-              placeholder="Ask anything…"
+              placeholder="Ask about our plushies…"
               style={{ flex: 1, border: '1.5px solid #E4DBD0', borderRadius: '100px', padding: '9px 16px', fontSize: '13px', fontFamily: 'inherit', background: 'white', outline: 'none' }}
             />
             <button

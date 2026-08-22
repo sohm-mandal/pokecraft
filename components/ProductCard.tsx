@@ -47,7 +47,9 @@ export function ProductCard({ product }: Props) {
             src={product.images[0]}
             alt={product.name}
             fill
-            style={{ objectFit: 'contain', padding: '1rem', transition: 'transform 0.3s' }}
+            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+            className="product-card-image"
+            style={{ objectFit: 'contain', transition: 'transform 0.3s' }}
           />
         ) : (
           <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '4rem' }}>🧶</div>

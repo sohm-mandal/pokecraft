@@ -17,7 +17,7 @@ export function WishlistClient() {
   }
 
   return (
-    <div style={{ maxWidth: '900px', margin: '0 auto', padding: '56px 20px' }}>
+    <div className="wishlist-page" style={{ maxWidth: '900px', margin: '0 auto', padding: '56px 20px' }}>
       <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: '36px', flexWrap: 'wrap', gap: '8px' }}>
         <div>
           <p style={{ fontSize: '10px', letterSpacing: '0.2em', textTransform: 'uppercase', color: '#C9906A', margin: '0 0 4px' }}>My Wishlist</p>
@@ -40,17 +40,17 @@ export function WishlistClient() {
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
           {products.map((p) => (
-            <div key={p.id} style={{ background: 'white', border: '1px solid #E4DBD0', borderRadius: '12px', padding: '16px 20px', display: 'flex', alignItems: 'center', gap: '16px', flexWrap: 'wrap' }}>
+            <div key={p.id} className="wishlist-row">
               {/* Image */}
-              <Link href={`/shop/${p.slug}`} style={{ flexShrink: 0, textDecoration: 'none' }}>
+              <Link href={`/shop/${p.slug}`} className="wishlist-row-media">
                 {p.images?.[0]
-                  ? <img src={p.images[0]} alt={p.name} style={{ width: '80px', height: '80px', objectFit: 'contain', background: '#F8F5F0', borderRadius: '8px', padding: '6px' }} />
-                  : <div style={{ width: '80px', height: '80px', background: '#F8F5F0', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '2rem' }}>🧶</div>
+                  ? <img src={p.images[0]} alt={p.name} className="wishlist-row-thumb" />
+                  : <div className="wishlist-row-thumb" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '2rem' }}>🧶</div>
                 }
               </Link>
 
               {/* Info */}
-              <div style={{ flex: 1, minWidth: 0 }}>
+              <div className="wishlist-row-info">
                 <Link href={`/shop/${p.slug}`} style={{ textDecoration: 'none', color: 'inherit' }}>
                   <p style={{ margin: '0 0 4px', fontWeight: 600, fontSize: '15px', color: '#1A1A18' }}>{p.name}</p>
                 </Link>
@@ -63,7 +63,7 @@ export function WishlistClient() {
               </div>
 
               {/* Actions */}
-              <div style={{ display: 'flex', gap: '8px', flexShrink: 0, flexWrap: 'wrap' }}>
+              <div className="wishlist-row-actions">
                 {p.stock_count > 0 && (
                   <button
                     onClick={() => addItem(p.id, 1)}

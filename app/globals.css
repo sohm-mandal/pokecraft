@@ -33,3 +33,93 @@ body {
 .font-serif {
   font-family: var(--font-serif);
 }
+
+/* Product card media — the tile is a fixed square, so padding is what decides how
+   large the plushie reads. A flat 1rem eats too much of a narrow mobile tile. */
+.product-card-image {
+  padding: 0.5rem;
+}
+
+@media (min-width: 641px) {
+  .product-card-image {
+    padding: 1rem;
+  }
+}
+
+/* Wishlist rows */
+.wishlist-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: #fff;
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  padding: 16px 20px;
+}
+
+.wishlist-row-media {
+  flex-shrink: 0;
+  text-decoration: none;
+}
+
+.wishlist-row-thumb {
+  width: 80px;
+  height: 80px;
+  object-fit: contain;
+  background: var(--color-bg);
+  border-radius: 8px;
+  padding: 6px;
+}
+
+.wishlist-row-info {
+  flex: 1;
+  min-width: 0;
+  /* Long product names must wrap instead of pushing the actions out of the card */
+  overflow-wrap: anywhere;
+}
+
+.wishlist-row-actions {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+/* Below this width the image + text + both buttons no longer fit on one line, so
+   the actions get their own full-width row instead of colliding with the price. */
+@media (max-width: 560px) {
+  .wishlist-row {
+    display: grid;
+    grid-template-columns: 72px minmax(0, 1fr);
+    grid-template-areas:
+      'media info'
+      'actions actions';
+    gap: 12px 14px;
+    padding: 14px;
+  }
+
+  .wishlist-row-media {
+    grid-area: media;
+  }
+
+  .wishlist-row-thumb {
+    width: 72px;
+    height: 72px;
+  }
+
+  .wishlist-row-info {
+    grid-area: info;
+  }
+
+  .wishlist-row-actions {
+    grid-area: actions;
+  }
+
+  .wishlist-row-actions > button {
+    flex: 1;
+  }
+
+  /* Clear the floating chat button so it never sits on the last row's actions */
+  .wishlist-page {
+    padding-bottom: 104px;
+  }
+}
